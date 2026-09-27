@@ -2,2229 +2,1053 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>أبرار الحربي | مراجعة Single Linked Lists</title>
-<meta name="description" content="منصة مراجعة تفاعلية لشابتر القوائم المرتبطة المفردة Single Linked Lists — 57 سؤالاً تفاعلياً مع ترجمة فورية وتقرير أداء مفصّل.">
+<title>مراجعة Single Linked List | أبرار الحربي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          pine: { 900:'#07221D', 800:'#0B2E27', 700:'#0F4438', 600:'#14584A', 500:'#1C7160' },
-          gold: { 700:'#A9791F', 600:'#C08A2E', 500:'#D8A441', 400:'#E7C274' },
-          sand: { 50:'#FDFBF7', 100:'#F8F3EA', 200:'#EFE6D8' },
-          ink: '#12241F',
-          clay: '#B4553C'
-        },
-        fontFamily: {
-          ar: ['"IBM Plex Sans Arabic"','sans-serif'],
-          en: ['Sora','sans-serif']
-        }
-      }
-    }
-  }
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ease-out: cubic-bezier(.22,.9,.28,1);
-    --ease-spring: cubic-bezier(.34,1.4,.5,1);
-    --shadow-soft: 0 24px 60px -28px rgba(11,46,39,.30);
-    --shadow-lift: 0 34px 80px -30px rgba(11,46,39,.42);
-  }
-  html{ scroll-behavior:smooth; }
-  body{
-    background:
-      radial-gradient(1200px 600px at 100% -10%, rgba(216,164,65,.12), transparent 60%),
-      radial-gradient(1000px 620px at -10% 10%, rgba(28,113,96,.10), transparent 62%),
-      #FDFBF7;
-    color:#12241F;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  ::selection{ background:#0F4438; color:#F8F3EA; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06040d;
+  --gold:#e9c46a;
+  --gold-2:#f7e3a1;
+  --gold-3:#c9a227;
+  --violet:#8b5cf6;
+  --pink:#f472b6;
+  --teal:#2dd4bf;
+  --green:#34d399;
+  --red:#f87171;
+  --txt:#f2eefb;
+  --muted:#a79ec4;
+  --stroke:rgba(255,255,255,.09);
+}
+html,body{height:100%}
+body{
+  font-family:'Cairo',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.7;
+}
+/* ---------- Background ---------- */
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora span{position:absolute;border-radius:50%;filter:blur(110px);opacity:.42;animation:drift 24s ease-in-out infinite alternate}
+.a1{width:540px;height:540px;background:#7c3aed;top:-160px;right:-140px}
+.a2{width:480px;height:480px;background:#0f766e;bottom:-180px;left:-140px;animation-delay:-7s;opacity:.35}
+.a3{width:440px;height:440px;background:#be185d;top:32%;left:38%;animation-delay:-14s;opacity:.20}
+.a4{width:380px;height:380px;background:#b45309;bottom:8%;right:12%;animation-delay:-4s;opacity:.22}
+@keyframes drift{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(-44px,64px,0) scale(1.16)}
+  100%{transform:translate3d(48px,-44px,0) scale(.94)}
+}
+.grid-overlay{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 78%);
+}
+#confetti{position:fixed;inset:0;width:100%;height:100%;z-index:80;pointer-events:none}
 
-  /* ===== Scrollbar ===== */
-  ::-webkit-scrollbar{ width:11px; height:11px; }
-  ::-webkit-scrollbar-track{ background:#F1EADF; }
-  ::-webkit-scrollbar-thumb{ background:linear-gradient(180deg,#14584A,#0B2E27); border-radius:99px; border:3px solid #F1EADF; }
+/* ---------- Layout ---------- */
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 80px}
+.wrap.wide{max-width:1000px}
+.screen{display:none;animation:fadeUp .5s ease both}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
-  /* ===== Reveal animations ===== */
-  .anim .reveal{ opacity:0; transform:translateY(28px); }
-  .anim .reveal.in{
-    opacity:1; transform:none;
-    transition:opacity .85s var(--ease-out), transform .95s var(--ease-out);
-    transition-delay:var(--d,0ms);
-  }
-  .anim .reveal-x{ opacity:0; transform:translateX(30px) }
-  .anim .reveal-x.in{ opacity:1; transform:none; transition:opacity .8s var(--ease-out), transform .9s var(--ease-out); transition-delay:var(--d,0ms); }
-  .anim .reveal-scale{ opacity:0; transform:scale(.94); }
-  .anim .reveal-scale.in{ opacity:1; transform:none; transition:opacity .7s var(--ease-out), transform .8s var(--ease-spring); transition-delay:var(--d,0ms); }
+.card{
+  background:linear-gradient(165deg,rgba(255,255,255,.062),rgba(255,255,255,.018));
+  border:1px solid var(--stroke);
+  border-radius:26px;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 40px 80px -44px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.07);
+  padding:28px;
+}
+.gold-text{
+  background:linear-gradient(100deg,#fff3cf,#e9c46a 35%,#fff0c2 55%,#c9a227 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
 
-  /* ===== Kinetic hero title ===== */
-  .kin-word{ display:inline-block; overflow:hidden; vertical-align:top; }
-  .kin-word > span{
-    display:inline-block; transform:translateY(112%) rotate(4deg); opacity:0;
-    animation:kinUp .95s var(--ease-out) forwards;
-  }
-  @keyframes kinUp{ to{ transform:none; opacity:1; } }
+/* ---------- Hero ---------- */
+.hero{padding:38px 30px;text-align:center;position:relative;overflow:hidden}
+.hero::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 0%,rgba(233,196,106,.16),transparent 62%);
+}
+.sa-greet{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(120deg,rgba(15,118,80,.28),rgba(15,118,80,.06));
+  border:1px solid rgba(52,211,153,.35);
+  border-radius:999px;padding:9px 18px;font-weight:600;font-size:.95rem;
+  color:#b8f5dd;margin-bottom:22px;position:relative;z-index:1;
+}
+.sa-greet .flag{font-size:1.25rem;filter:drop-shadow(0 0 10px rgba(52,211,153,.6))}
+h1{font-size:clamp(1.6rem,4.6vw,2.85rem);font-weight:900;line-height:1.35;letter-spacing:-.5px;position:relative;z-index:1}
+.hero p.sub{color:var(--muted);margin-top:14px;font-size:1.02rem;max-width:620px;margin-inline:auto;position:relative;z-index:1}
+.hero .en{font-family:'Inter',sans-serif;direction:ltr;display:inline-block;letter-spacing:.5px}
 
-  .shine{
-    background:linear-gradient(100deg,#E7C274 0%,#FFF6E2 22%,#D8A441 42%,#E7C274 62%);
-    background-size:220% 100%;
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation:shineMove 7s linear infinite;
-  }
-  @keyframes shineMove{ 0%{ background-position:180% 0 } 100%{ background-position:-80% 0 } }
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:28px 0 26px;position:relative;z-index:1}
+.stat{
+  background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+  border:1px solid var(--stroke);border-radius:18px;padding:16px 8px;
+}
+.stat b{display:block;font-size:1.6rem;font-weight:900;font-family:'Inter',sans-serif}
+.stat span{font-size:.78rem;color:var(--muted)}
 
-  /* ===== Hero visuals ===== */
-  .hero-bg{
-    position:absolute; inset:0;
-    background-image:url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1900&q=80');
-    background-size:cover; background-position:center;
-    opacity:.16; filter:saturate(.75) contrast(1.05);
-    transform:scale(1.08);
-    will-change:transform;
-  }
-  .hero-veil{
-    position:absolute; inset:0;
-    background:
-      linear-gradient(115deg, rgba(7,34,29,.97) 8%, rgba(11,46,39,.92) 42%, rgba(15,68,56,.78) 100%),
-      radial-gradient(900px 520px at 78% 18%, rgba(216,164,65,.22), transparent 62%);
-  }
-  .grid-lines{
-    position:absolute; inset:0;
-    background-image:linear-gradient(rgba(231,194,116,.09) 1px, transparent 1px),
-                     linear-gradient(90deg, rgba(231,194,116,.09) 1px, transparent 1px);
-    background-size:64px 64px;
-    mask-image:radial-gradient(circle at 30% 30%, #000 10%, transparent 72%);
-    -webkit-mask-image:radial-gradient(circle at 30% 30%, #000 10%, transparent 72%);
-  }
-  .mouse-glow{
-    position:absolute; width:640px; height:640px; border-radius:50%;
-    background:radial-gradient(circle, rgba(216,164,65,.16), transparent 66%);
-    pointer-events:none; transform:translate(-50%,-50%);
-    transition:opacity .5s ease; opacity:0;
-  }
+/* ---------- Buttons ---------- */
+.btn{
+  font-family:inherit;font-weight:800;cursor:pointer;border:none;border-radius:16px;
+  padding:15px 30px;font-size:1.02rem;transition:transform .2s,box-shadow .25s,filter .2s;
+  position:relative;overflow:hidden;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{
+  background:linear-gradient(120deg,#f7e3a1,#e9c46a 45%,#d4af37);
+  color:#221603;
+  box-shadow:0 18px 40px -18px rgba(233,196,106,.85),inset 0 1px 0 rgba(255,255,255,.6);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 26px 50px -20px rgba(233,196,106,.95)}
+.btn-primary::after{
+  content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);
+  transform:skewX(-22deg);animation:shine 3.4s infinite;
+}
+@keyframes shine{0%{left:-120%}45%{left:140%}100%{left:140%}}
+.btn-ghost{
+  background:rgba(255,255,255,.05);color:var(--txt);border:1px solid var(--stroke);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(233,196,106,.5)}
+.btn-translate{
+  font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;
+  background:linear-gradient(120deg,rgba(139,92,246,.25),rgba(45,212,191,.18));
+  border:1px solid rgba(139,92,246,.45);color:#dcd2ff;
+  border-radius:12px;padding:8px 14px;transition:all .2s;white-space:nowrap;
+}
+.btn-translate:hover{transform:translateY(-2px);border-color:rgba(233,196,106,.7);color:#fff5d8}
+.btn-translate.on{background:linear-gradient(120deg,rgba(233,196,106,.3),rgba(233,196,106,.12));border-color:rgba(233,196,106,.65);color:#ffeab4}
 
-  .node-card{
-    background:rgba(255,255,255,.055);
-    border:1px solid rgba(231,194,116,.28);
-    backdrop-filter:blur(6px);
-    border-radius:22px;
-  }
-  .float-slow{ animation:floaty 7s ease-in-out infinite; }
-  .float-slower{ animation:floaty 9.5s ease-in-out infinite reverse; }
-  @keyframes floaty{
-    0%,100%{ transform:translateY(0) rotate(0deg) }
-    50%{ transform:translateY(-16px) rotate(-.6deg) }
-  }
+/* ---------- Quiz bar ---------- */
+.quizbar{
+  display:flex;align-items:center;gap:16px;margin-bottom:20px;
+  background:linear-gradient(165deg,rgba(255,255,255,.055),rgba(255,255,255,.015));
+  border:1px solid var(--stroke);border-radius:18px;padding:12px 18px;
+  backdrop-filter:blur(12px);
+}
+.qb-info{display:flex;align-items:center;gap:9px;font-weight:700;font-size:.88rem;white-space:nowrap}
+.qb-avatar{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:.9rem;font-weight:900;
+  background:linear-gradient(140deg,#e9c46a,#b45309);color:#1a1200;
+}
+.qb-track{flex:1;height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;min-width:60px}
+.qb-fill{height:100%;width:0;border-radius:999px;transition:width .45s cubic-bezier(.4,1.3,.5,1);
+  background:linear-gradient(90deg,#8b5cf6,#e9c46a);box-shadow:0 0 16px rgba(233,196,106,.6)}
+.qb-count{font-family:'Inter',sans-serif;font-weight:700;font-size:.85rem;color:#e6dcff;white-space:nowrap}
 
-  /* linked list svg */
-  .link-path{
-    stroke-dasharray:220; stroke-dashoffset:220;
-    animation:draw 2.4s var(--ease-out) forwards;
-  }
-  @keyframes draw{ to{ stroke-dashoffset:0 } }
-  .pulse-node{ transform-box:fill-box; transform-origin:center; animation:nodePulse 3.4s ease-in-out infinite; }
-  @keyframes nodePulse{ 0%,100%{ transform:scale(1); opacity:1 } 50%{ transform:scale(1.09); opacity:.86 } }
+/* ---------- Question ---------- */
+.q-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.badge{
+  font-size:.76rem;font-weight:800;padding:6px 14px;border-radius:999px;
+  background:linear-gradient(120deg,rgba(139,92,246,.28),rgba(139,92,246,.08));
+  border:1px solid rgba(139,92,246,.45);color:#ddd3ff;
+}
+.q-num{font-size:.82rem;color:var(--muted);font-weight:700}
+.score-chip{
+  margin-inline-start:auto;font-size:.8rem;font-weight:800;padding:6px 13px;border-radius:999px;
+  background:linear-gradient(120deg,rgba(233,196,106,.2),rgba(233,196,106,.05));
+  border:1px solid rgba(233,196,106,.4);color:#ffe6a8;font-family:'Inter',sans-serif;
+}
+.q-en{
+  font-family:'Inter',sans-serif;font-size:clamp(1.05rem,2.4vw,1.32rem);font-weight:600;
+  line-height:1.65;color:#ffffff;letter-spacing:.1px;
+}
+.q-ar{
+  display:none;margin-top:14px;padding:14px 16px;border-radius:14px;
+  background:linear-gradient(120deg,rgba(233,196,106,.13),rgba(233,196,106,.04));
+  border:1px solid rgba(233,196,106,.28);
+  color:#ffeec2;font-size:.98rem;font-weight:600;
+}
+.show-tr .q-ar{display:block;animation:fadeUp .35s ease both}
+.q-tools{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 6px}
 
-  /* ===== Marquee ===== */
-  .marquee{
-    overflow:hidden; white-space:nowrap;
-    background:linear-gradient(90deg,#0B2E27,#14584A 45%,#0B2E27);
-    border-top:1px solid rgba(231,194,116,.22);
-    border-bottom:1px solid rgba(231,194,116,.22);
-  }
-  .marquee-track{ display:inline-flex; gap:0; animation:slide 34s linear infinite; }
-  .marquee:hover .marquee-track{ animation-play-state:paused; }
-  @keyframes slide{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+.options{display:grid;gap:12px;margin-top:18px}
+.option{
+  display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;direction:ltr;
+  padding:15px 18px;border-radius:18px;cursor:pointer;font-family:inherit;
+  background:linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  border:1px solid var(--stroke);color:#efeaff;font-size:1rem;
+  transition:transform .18s,border-color .2s,background .2s,box-shadow .2s;
+}
+.option:hover:not(:disabled){transform:translateY(-2px);border-color:rgba(233,196,106,.55);box-shadow:0 16px 34px -22px rgba(233,196,106,.9)}
+.option:disabled{cursor:default}
+.letter{
+  flex:0 0 34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(150deg,rgba(233,196,106,.22),rgba(233,196,106,.05));
+  border:1px solid rgba(233,196,106,.32);color:#f4dfa4;font-weight:800;font-family:'Inter',sans-serif;font-size:.9rem;
+}
+.opt-text{flex:1;display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.opt-en{font-family:'Inter',sans-serif;font-size:.98rem;line-height:1.6}
+.opt-ar{display:none;direction:rtl;text-align:right;font-size:.88rem;color:#bfe9dd;font-weight:600;
+  border-right:2px solid rgba(45,212,191,.5);padding-right:10px}
+.show-tr .opt-ar{display:block;animation:fadeUp .3s ease both}
+.option.correct{
+  border-color:rgba(52,211,153,.75);
+  background:linear-gradient(165deg,rgba(16,185,129,.22),rgba(16,185,129,.05));
+  box-shadow:0 0 0 1px rgba(52,211,153,.35),0 20px 40px -26px rgba(52,211,153,.9);
+}
+.option.correct .letter{background:linear-gradient(150deg,#34d399,#0f766e);color:#04150f;border-color:transparent}
+.option.wrong{
+  border-color:rgba(248,113,113,.7);
+  background:linear-gradient(165deg,rgba(239,68,68,.2),rgba(239,68,68,.05));
+  animation:shake .42s;
+}
+.option.wrong .letter{background:linear-gradient(150deg,#f87171,#991b1b);color:#1a0505;border-color:transparent}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
 
-  /* ===== Buttons ===== */
-  .btn{
-    position:relative; overflow:hidden; isolation:isolate;
-    transition:transform .38s var(--ease-spring), box-shadow .38s var(--ease-out), background-color .3s, color .3s;
-    will-change:transform;
-  }
-  .btn:hover{ transform:translateY(-3px); }
-  .btn:active{ transform:translateY(0) scale(.985); }
-  .btn-gold{
-    background:linear-gradient(135deg,#E7C274,#D8A441 55%,#C08A2E);
-    color:#0B2E27; box-shadow:0 18px 40px -18px rgba(192,138,46,.75);
-  }
-  .btn-gold:hover{ box-shadow:0 26px 54px -18px rgba(192,138,46,.85); }
-  .btn-dark{ background:#0B2E27; color:#F8F3EA; box-shadow:0 18px 42px -20px rgba(11,46,39,.75); }
-  .btn-ghost{ border:1px solid rgba(231,194,116,.55); color:#F3E6C8; }
-  .btn-ghost:hover{ background:rgba(231,194,116,.14); }
-  .btn-sweep::after{
-    content:""; position:absolute; inset:0; z-index:-1;
-    background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.55) 48%,transparent 62%);
-    transform:translateX(-120%); transition:transform .75s var(--ease-out);
-  }
-  .btn-sweep:hover::after{ transform:translateX(120%); }
+/* ---------- Feedback ---------- */
+.feedback{margin-top:20px;border-radius:18px;padding:0;font-weight:800;font-size:1.05rem;overflow:hidden;
+  max-height:0;opacity:0;transition:max-height .4s ease,opacity .3s ease,padding .3s ease}
+.feedback.show{max-height:220px;opacity:1;padding:16px 20px}
+.feedback.ok{
+  background:linear-gradient(120deg,rgba(52,211,153,.22),rgba(45,212,191,.08));
+  border:1px solid rgba(52,211,153,.5);color:#c8ffe9;
+}
+.feedback.no{
+  background:linear-gradient(120deg,rgba(248,113,113,.2),rgba(248,113,113,.05));
+  border:1px solid rgba(248,113,113,.5);color:#ffd6d6;
+}
+.feedback small{display:block;font-weight:600;font-size:.86rem;opacity:.85;margin-top:4px}
+.q-footer{margin-top:22px;display:flex;justify-content:center}
 
-  /* ===== Cards ===== */
-  .card{
-    background:#fff;
-    border:1px solid rgba(11,46,39,.09);
-    border-radius:26px;
-    box-shadow:var(--shadow-soft);
-    transition:transform .55s var(--ease-out), box-shadow .55s var(--ease-out), border-color .4s;
-  }
-  .card:hover{ transform:translateY(-8px); box-shadow:var(--shadow-lift); border-color:rgba(192,138,46,.32); }
-  .concept-icon{
-    width:56px; height:56px; border-radius:18px;
-    display:grid; place-items:center;
-    background:linear-gradient(140deg,#0F4438,#14584A);
-    color:#E7C274;
-    box-shadow:0 16px 32px -16px rgba(15,68,56,.7);
-    transition:transform .5s var(--ease-spring);
-  }
-  .card:hover .concept-icon{ transform:rotate(-8deg) scale(1.06); }
+/* ---------- Pop ---------- */
+.pop{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:90;opacity:0;transition:opacity .25s}
+.pop.show{opacity:1}
+.pop .inner{
+  font-size:clamp(1.3rem,4.4vw,2.3rem);font-weight:900;padding:22px 40px;border-radius:24px;
+  background:linear-gradient(140deg,rgba(20,12,40,.92),rgba(45,22,70,.9));
+  border:1.5px solid rgba(233,196,106,.65);
+  box-shadow:0 0 0 8px rgba(233,196,106,.08),0 40px 90px -30px rgba(233,196,106,.6);
+  transform:scale(.85);transition:transform .35s cubic-bezier(.3,1.6,.5,1);
+  text-align:center;
+}
+.pop.show .inner{transform:scale(1)}
 
-  /* ===== Quiz ===== */
-  .quiz-shell{
-    background:
-      linear-gradient(180deg,#FFFFFF, #FDFBF7);
-    border:1px solid rgba(11,46,39,.10);
-    border-radius:32px;
-    box-shadow:0 40px 90px -40px rgba(11,46,39,.42);
-    position:relative; overflow:hidden;
-  }
-  .quiz-shell::before{
-    content:""; position:absolute; top:0; right:0; left:0; height:5px;
-    background:linear-gradient(90deg,#0B2E27,#1C7160 30%,#D8A441 55%,#1C7160 80%,#0B2E27);
-    background-size:220% 100%;
-    animation:shineMove 9s linear infinite;
-  }
+/* ---------- Results ---------- */
+.result-head{text-align:center;padding:34px 24px;position:relative;overflow:hidden}
+.result-head::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(233,196,106,.18),transparent 65%);pointer-events:none}
+.ring{
+  width:180px;height:180px;border-radius:50%;margin:6px auto 18px;display:grid;place-items:center;
+  background:conic-gradient(#e9c46a calc(var(--p,0)*1%),rgba(255,255,255,.08) 0);
+  position:relative;z-index:1;
+  box-shadow:0 0 60px -10px rgba(233,196,106,.55);
+}
+.ring-in{
+  width:150px;height:150px;border-radius:50%;background:#0b0718;display:grid;place-items:center;text-align:center;
+  border:1px solid rgba(255,255,255,.07);
+}
+.ring-in b{font-family:'Inter',sans-serif;font-size:2.3rem;font-weight:800;display:block;line-height:1.1}
+.ring-in small{font-size:.72rem;color:var(--muted);font-weight:700}
+.result-title{font-size:clamp(1.4rem,4vw,2.1rem);font-weight:900;position:relative;z-index:1}
+.result-sub{color:var(--muted);margin-top:8px;position:relative;z-index:1;font-size:.98rem}
 
-  .opt{
-    position:relative; width:100%; text-align:right;
-    display:flex; align-items:center; gap:14px;
-    padding:16px 18px; border-radius:18px;
-    background:#fff; border:1.6px solid rgba(11,46,39,.11);
-    transition:transform .32s var(--ease-out), border-color .3s, background-color .3s, box-shadow .35s;
-    overflow:hidden;
-  }
-  .opt::before{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(120deg, rgba(216,164,65,.14), transparent 60%);
-    opacity:0; transition:opacity .4s ease;
-  }
-  .opt:not(:disabled):hover{
-    transform:translateX(-6px);
-    border-color:rgba(192,138,46,.55);
-    box-shadow:0 20px 42px -24px rgba(11,46,39,.5);
-  }
-  .opt:not(:disabled):hover::before{ opacity:1; }
-  .opt-letter{
-    flex:none; width:42px; height:42px; border-radius:13px;
-    display:grid; place-items:center;
-    background:#F3EEE4; color:#0B2E27;
-    font-family:'Sora',sans-serif; font-weight:700; font-size:15px;
-    transition:all .35s var(--ease-out);
-  }
-  .opt:not(:disabled):hover .opt-letter{ background:#0B2E27; color:#E7C274; transform:rotate(-6deg); }
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+.sum-card{border-radius:18px;padding:16px;text-align:center;border:1px solid var(--stroke);
+  background:linear-gradient(165deg,rgba(255,255,255,.055),rgba(255,255,255,.012))}
+.sum-card b{display:block;font-family:'Inter',sans-serif;font-size:1.7rem;font-weight:800}
+.sum-card span{font-size:.78rem;color:var(--muted)}
+.sum-card.g b{color:#6ee7b7}.sum-card.a b{color:#fbbf24}.sum-card.r b{color:#fca5a5}
 
-  .opt.correct{
-    border-color:#1B8A5E; background:linear-gradient(120deg,#EAF7F0,#F6FCF8);
-    box-shadow:0 22px 50px -26px rgba(27,138,94,.6);
-    animation:popCorrect .6s var(--ease-spring);
-  }
-  .opt.correct .opt-letter{ background:#1B8A5E; color:#fff; }
-  .opt.wrong{
-    border-color:#C2553D; background:linear-gradient(120deg,#FBEDE9,#FEF7F5);
-    animation:shakeX .55s ease;
-  }
-  .opt.wrong .opt-letter{ background:#C2553D; color:#fff; }
-  .opt.dim{ opacity:.55; }
-  .opt.reveal-answer{ border-color:#1B8A5E; background:#EFF8F3; }
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:6px 0 26px}
+.res-list{display:grid;gap:14px}
+.res-item{
+  border-radius:20px;padding:18px 20px;border:1px solid var(--stroke);
+  background:linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  transition:border-color .2s,transform .2s;
+}
+.res-item:hover{transform:translateY(-2px)}
+.res-item.good{border-color:rgba(52,211,153,.35)}
+.res-item.retry{border-color:rgba(251,191,36,.4)}
+.res-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.res-num{
+  flex:0 0 32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:800;
+  font-family:'Inter',sans-serif;font-size:.85rem;background:rgba(255,255,255,.07);border:1px solid var(--stroke);
+}
+.res-item.good .res-num{background:linear-gradient(150deg,rgba(52,211,153,.3),rgba(52,211,153,.08));border-color:rgba(52,211,153,.45);color:#c8ffe9}
+.res-item.retry .res-num{background:linear-gradient(150deg,rgba(251,191,36,.3),rgba(251,191,36,.08));border-color:rgba(251,191,36,.45);color:#ffe8b8}
+.res-q{font-family:'Inter',sans-serif;font-size:.95rem;direction:ltr;text-align:left;flex:1;min-width:180px;line-height:1.55;padding-top:3px}
+.res-tag{font-size:.72rem;font-weight:800;padding:5px 11px;border-radius:999px;white-space:nowrap}
+.res-item.good .res-tag{background:rgba(52,211,153,.16);color:#a7f3d0;border:1px solid rgba(52,211,153,.4)}
+.res-item.retry .res-tag{background:rgba(251,191,36,.16);color:#fde68a;border:1px solid rgba(251,191,36,.4)}
+.res-ar{display:none;margin-top:10px;font-size:.9rem;color:#ffeec2;font-weight:600;
+  background:rgba(233,196,106,.08);border-radius:12px;padding:10px 14px;border:1px solid rgba(233,196,106,.2)}
+.res-item.show-ar .res-ar{display:block;animation:fadeUp .3s both}
+.res-ans{margin-top:12px;display:grid;gap:8px}
+.ans{font-size:.88rem;border-radius:12px;padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.ans b{font-weight:800;white-space:nowrap}
+.ans .v{font-family:'Inter',sans-serif;direction:ltr;text-align:left}
+.ans.ok{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#b7f7dd}
+.ans.bad{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.32);color:#ffd0d0}
+.res-tools{display:flex;justify-content:flex-end;margin-top:10px}
 
-  @keyframes popCorrect{
-    0%{ transform:scale(1) }
-    45%{ transform:scale(1.035) }
-    100%{ transform:scale(1) }
-  }
-  @keyframes shakeX{
-    0%,100%{ transform:translateX(0) }
-    20%{ transform:translateX(-9px) }
-    40%{ transform:translateX(8px) }
-    60%{ transform:translateX(-5px) }
-    80%{ transform:translateX(4px) }
-  }
+/* ---------- Footer ---------- */
+.foot{text-align:center;padding:30px 16px 50px;color:#6f668c;font-size:.82rem}
+.foot b{color:#c9a227}
 
-  .opt-ar{
-    display:none; font-size:13.5px; color:#4B6259; margin-top:3px; line-height:1.7;
-  }
-  .translated .opt-ar{ display:block; animation:fadeUp .45s var(--ease-out) both; }
-
-  .tr-panel{
-    max-height:0; opacity:0; overflow:hidden; margin-top:0;
-    transition:max-height .55s var(--ease-out), opacity .45s ease, margin-top .45s ease;
-  }
-  .translated .tr-panel{ max-height:220px; opacity:1; margin-top:14px; }
-
-  @keyframes fadeUp{ from{ opacity:0; transform:translateY(6px) } to{ opacity:1; transform:none } }
-
-  .badge{
-    display:inline-flex; align-items:center; gap:7px;
-    padding:6px 13px; border-radius:999px;
-    font-size:12.5px; font-weight:600; letter-spacing:.2px;
-    background:rgba(28,113,96,.10); color:#0F4438;
-    border:1px solid rgba(28,113,96,.18);
-  }
-  .badge-gold{ background:rgba(216,164,65,.16); color:#8A5F12; border-color:rgba(216,164,65,.32); }
-
-  .feedback{
-    border-radius:20px; padding:16px 18px; display:none; align-items:flex-start; gap:13px;
-  }
-  .feedback.show{ display:flex; animation:fadeUp .5s var(--ease-out) both; }
-  .feedback.ok{ background:linear-gradient(120deg,#E9F7EF,#F5FBF7); border:1px solid rgba(27,138,94,.28); }
-  .feedback.bad{ background:linear-gradient(120deg,#FBEDE8,#FEF7F4); border:1px solid rgba(194,85,61,.28); }
-
-  /* palette */
-  .pal{
-    width:38px; height:38px; border-radius:11px; font-size:12.5px; font-weight:600;
-    display:grid; place-items:center;
-    background:#fff; border:1.5px solid rgba(11,46,39,.12); color:#3B5249;
-    transition:all .3s var(--ease-out); font-family:'Sora',sans-serif;
-  }
-  .pal:hover{ transform:translateY(-3px) scale(1.06); border-color:#D8A441; }
-  .pal.active{ background:#0B2E27; color:#E7C274; border-color:#0B2E27; transform:translateY(-3px) scale(1.08); }
-  .pal.done{ background:#1B8A5E; color:#fff; border-color:#1B8A5E; }
-  .pal.miss{ background:#C2553D; color:#fff; border-color:#C2553D; }
-
-  /* progress ring */
-  .ring-track{ stroke:rgba(11,46,39,.12); }
-  .ring-bar{ stroke:url(#ringGrad); stroke-linecap:round; transition:stroke-dashoffset .85s var(--ease-out); }
-
-  /* toast */
-  #toastWrap{
-    position:fixed; top:22px; left:50%; transform:translateX(-50%);
-    z-index:120; display:flex; flex-direction:column; gap:10px; align-items:center;
-    pointer-events:none; width:calc(100% - 32px); max-width:520px;
-  }
-  .toast{
-    width:100%; border-radius:18px; padding:14px 18px;
-    display:flex; align-items:center; gap:12px;
-    box-shadow:0 30px 70px -26px rgba(11,46,39,.55);
-    animation:toastIn .55s var(--ease-spring) both;
-    font-weight:600;
-  }
-  .toast.ok{ background:linear-gradient(120deg,#0F4438,#1C7160); color:#F4EEDF; border:1px solid rgba(231,194,116,.4); }
-  .toast.bad{ background:linear-gradient(120deg,#7E2C1C,#B4553C); color:#FFF1EC; border:1px solid rgba(255,220,205,.35); }
-  .toast.out{ animation:toastOut .5s var(--ease-out) forwards; }
-  @keyframes toastIn{ from{ opacity:0; transform:translateY(-24px) scale(.94) } to{ opacity:1; transform:none } }
-  @keyframes toastOut{ to{ opacity:0; transform:translateY(-18px) scale(.96) } }
-
-  /* confetti */
-  #confetti{ position:fixed; inset:0; pointer-events:none; z-index:130; }
-
-  /* nav */
-  #nav{
-    transition:background-color .5s ease, box-shadow .5s ease, padding .4s ease, backdrop-filter .4s;
-  }
-  #nav.scrolled{
-    background:rgba(253,251,247,.92);
-    box-shadow:0 18px 50px -30px rgba(11,46,39,.5);
-  }
-  .nav-link{ position:relative; }
-  .nav-link::after{
-    content:""; position:absolute; bottom:-6px; right:0; height:2px; width:0;
-    background:linear-gradient(90deg,#D8A441,#0F4438); border-radius:99px;
-    transition:width .45s var(--ease-out);
-  }
-  .nav-link:hover::after, .nav-link.active::after{ width:100%; }
-
-  /* results */
-  .score-ring{
-    filter:drop-shadow(0 22px 42px rgba(11,46,39,.28));
-  }
-  .report-item{
-    border-radius:20px; border:1px solid rgba(11,46,39,.10); background:#fff;
-    padding:18px; transition:transform .45s var(--ease-out), box-shadow .45s;
-  }
-  .report-item:hover{ transform:translateY(-4px); box-shadow:var(--shadow-soft); }
-  .status-dot{ width:11px; height:11px; border-radius:99px; flex:none; }
-
-  .divider-gold{
-    height:1px; background:linear-gradient(90deg,transparent,rgba(192,138,46,.55),transparent);
-  }
-
-  /* hero scroll cue */
-  .scroll-cue span{
-    display:block; width:2px; height:46px; border-radius:99px;
-    background:linear-gradient(180deg,rgba(231,194,116,.9),rgba(231,194,116,0));
-    animation:cue 2.2s ease-in-out infinite;
-  }
-  @keyframes cue{
-    0%{ transform:translateY(-12px); opacity:0 }
-    40%{ opacity:1 }
-    100%{ transform:translateY(18px); opacity:0 }
-  }
-
-  .magnetic{ will-change:transform; }
-
-  .img-mask{
-    position:relative; overflow:hidden; border-radius:26px;
-  }
-  .img-mask img{
-    width:100%; height:100%; object-fit:cover;
-    transform:scale(1.12); transition:transform 1.1s var(--ease-out), filter .8s;
-  }
-  .img-mask:hover img{ transform:scale(1.02); }
-  .img-mask::after{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(200deg, rgba(7,34,29,.05), rgba(7,34,29,.55));
-  }
-
-  .stat-num{ font-family:'Sora',sans-serif; font-weight:800; letter-spacing:-1px; }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.12s !important; }
-    .anim .reveal, .anim .reveal-x, .anim .reveal-scale{ opacity:1 !important; transform:none !important; }
-    .kin-word > span{ opacity:1 !important; transform:none !important; }
-  }
-
-  @media print{
-    #nav, footer, #home, #concepts, .marquee, .no-print{ display:none !important; }
-    body{ background:#fff; }
-    .report-item{ break-inside:avoid; box-shadow:none; }
-  }
+@media(max-width:640px){
+  .wrap{padding:16px 12px 70px}
+  .card{padding:20px 16px;border-radius:22px}
+  .hero{padding:26px 18px}
+  .stat-row{grid-template-columns:1fr;gap:10px}
+  .summary{grid-template-columns:1fr}
+  .quizbar{padding:10px 12px;gap:10px;font-size:.8rem}
+  .qb-info span:not(.qb-avatar){display:none}
+  .option{padding:13px 14px}
+  .btn{padding:13px 22px;font-size:.95rem}
+  .ring{width:150px;height:150px}.ring-in{width:122px;height:122px}.ring-in b{font-size:1.9rem}
+}
 </style>
 </head>
-<body class="font-ar">
+<body>
 
+<div class="aurora"><span class="a1"></span><span class="a2"></span><span class="a3"></span><span class="a4"></span></div>
+<div class="grid-overlay"></div>
 <canvas id="confetti"></canvas>
-<div id="toastWrap"></div>
-
-<!-- ============ NAV ============ -->
-<header id="nav" class="fixed top-0 inset-x-0 z-50 py-3">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between gap-4">
-      <a href="#home" class="flex items-center gap-3 group">
-        <div class="relative w-11 h-11 rounded-2xl bg-pine-800 grid place-items-center shadow-lg shadow-pine-800/25 overflow-hidden">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="relative z-10">
-            <circle cx="6" cy="12" r="3.2" stroke="#E7C274" stroke-width="1.8"/>
-            <circle cx="18" cy="12" r="3.2" stroke="#E7C274" stroke-width="1.8" opacity=".55"/>
-            <path d="M9.4 12h5.2" stroke="#E7C274" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <div class="absolute inset-0 bg-gradient-to-tr from-gold-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        </div>
-        <div class="leading-tight">
-          <div class="font-bold text-pine-800 text-[15px]">أبرار الحربي</div>
-          <div class="text-[11px] text-pine-600/80 font-en tracking-wide">Single Linked Lists</div>
-        </div>
-      </a>
-
-      <nav class="hidden lg:flex items-center gap-8 text-[14px] font-medium text-pine-800/85">
-        <a href="#home" class="nav-link hover:text-pine-800 transition-colors">الرئيسية</a>
-        <a href="#concepts" class="nav-link hover:text-pine-800 transition-colors">المفاهيم</a>
-        <a href="#quiz" class="nav-link hover:text-pine-800 transition-colors">الأسئلة</a>
-        <a href="#result" class="nav-link hover:text-pine-800 transition-colors">التقرير</a>
-      </nav>
-
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="soundBtn" title="الصوت" class="w-10 h-10 rounded-full border border-pine-800/12 bg-white/80 grid place-items-center text-pine-800 hover:border-gold-500 hover:text-gold-700 transition-all duration-300">
-          <svg id="soundOnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
-          </svg>
-          <svg id="soundOffIcon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/>
-          </svg>
-        </button>
-        <a href="#quiz" class="btn btn-sweep magnetic hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full btn-gold text-[13.5px] font-bold">
-          ابدئي الكويز
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        </a>
-      </div>
-    </div>
-  </div>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
-    <div class="h-[3px] rounded-full bg-pine-800/10 overflow-hidden">
-      <div id="scrollProgress" class="h-full rounded-full bg-gradient-to-l from-gold-500 to-pine-600 transition-[width] duration-150" style="width:0%"></div>
-    </div>
-  </div>
-</header>
+<div class="pop" id="pop"><div class="inner" id="popInner"></div></div>
 
 <main>
-<!-- ============ HERO ============ -->
-<section id="home" class="relative min-h-[100svh] flex items-center pt-28 pb-20 overflow-hidden">
-  <div class="hero-bg" id="heroBg"></div>
-  <div class="hero-veil"></div>
-  <div class="grid-lines"></div>
-  <div class="mouse-glow" id="mouseGlow"></div>
-
-  <!-- floating decorative nodes -->
-  <div class="absolute inset-0 pointer-events-none">
-    <svg class="absolute left-[6%] top-[16%] w-24 h-24 opacity-40 float-slow" viewBox="0 0 100 100" fill="none">
-      <rect x="12" y="34" width="76" height="32" rx="10" stroke="#E7C274" stroke-width="2"/>
-      <line x1="12" y1="50" x2="0" y2="50" stroke="#E7C274" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="88" cy="50" r="5" fill="#E7C274"/>
-    </svg>
-    <svg class="absolute right-[8%] bottom-[14%] w-28 h-28 opacity-30 float-slower" viewBox="0 0 100 100" fill="none">
-      <circle cx="50" cy="50" r="34" stroke="#E7C274" stroke-width="2" stroke-dasharray="6 10"/>
-      <circle cx="50" cy="50" r="12" fill="#E7C274" opacity=".5"/>
-    </svg>
-  </div>
-
-  <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid lg:grid-cols-12 gap-12 items-center">
-
-      <!-- copy -->
-      <div class="lg:col-span-7">
-        <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-gold-400/35 bg-gold-400/10 text-gold-400 text-[13px] font-medium mb-7 reveal in">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-gold-400"></span>
-          </span>
-          السلام عليكم ورحمة الله وبركاتك يا أبرار
-        </div>
-
-        <h1 class="text-white font-bold leading-[1.18] text-[clamp(2.15rem,6.4vw,4.65rem)]">
-          <span class="kin-word"><span style="animation-delay:.10s">راجعي</span></span>
-          <span class="kin-word"><span style="animation-delay:.22s">المفاهيم،</span></span>
-          <br>
-          <span class="kin-word"><span class="shine" style="animation-delay:.34s">وابدئي</span></span>
-          <span class="kin-word"><span style="animation-delay:.46s">الاختبار</span></span>
-          <span class="kin-word"><span style="animation-delay:.58s">بثقة.</span></span>
-        </h1>
-
-        <p class="mt-7 text-[17px] sm:text-[19px] leading-[2.1] text-white/78 max-w-2xl reveal in" style="--d:120ms">
-          مراجعة تفاعلية شاملة لشابتر <span class="font-en text-gold-400 font-semibold">Single Linked Lists</span>
-          — خمسة وخمسون سؤالاً مصمّمة لتجهزكِ للكويز بأعلى درجة، مع ترجمة فورية لكل سؤال،
-          وتشجيع فوري عند كل إجابة صحيحة، وتقرير أداء مفصّل في النهاية.
+  <!-- ================= HOME ================= -->
+  <section id="screen-home" class="screen active">
+    <div class="wrap">
+      <div class="card hero">
+        <div class="sa-greet"><span class="flag">🇸🇦</span> السلام عليكم ورحمة الله وبركاته</div>
+        <h1>حياكِ الله يا <span class="gold-text">أبرار الحربي</span> 🌿<br>
+        مراجعة شابتر <span class="gold-text en">Single Linked List</span></h1>
+        <p class="sub">
+          يا هلا ويا مرحبا فيكِ يا أبرار! جهّزنا لكِ مراجعة تفاعلية كاملة على شابتر
+          <span class="en">Single Linked List</span> استعدادًا للكويز.
+          كل إجابة صحيحة فيها احتفال وتحفيز، وكل إجابة تحتاج تركيز أكثر نقول لكِ «حاولي مرة أخرى» 💪
         </p>
 
-        <div class="mt-9 flex flex-wrap items-center gap-3.5 reveal in" style="--d:220ms">
-          <a href="#quiz" class="btn btn-sweep magnetic inline-flex items-center gap-2.5 px-8 py-4 rounded-full btn-gold font-bold text-[15px]">
-            ابدئي المراجعة الآن
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-          </a>
-          <a href="#concepts" class="btn magnetic inline-flex items-center gap-2.5 px-8 py-4 rounded-full btn-ghost font-semibold text-[15px]">
-            استعرضي المفاهيم الأساسية
-          </a>
+        <div class="stat-row">
+          <div class="stat"><b class="gold-text">57</b><span>سؤال تفاعلي</span></div>
+          <div class="stat"><b class="gold-text">20</b><span>صح أو خطأ</span></div>
+          <div class="stat"><b class="gold-text">37</b><span>اختيار من متعدد</span></div>
         </div>
 
-        <!-- stats -->
-        <div class="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 max-w-2xl">
-          <div class="node-card p-4 reveal in" style="--d:280ms">
-            <div class="stat-num text-3xl text-gold-400"><span class="count" data-target="57">0</span></div>
-            <div class="text-white/70 text-[12.5px] mt-1.5">سؤال تفاعلي</div>
-          </div>
-          <div class="node-card p-4 reveal in" style="--d:340ms">
-            <div class="stat-num text-3xl text-gold-400"><span class="count" data-target="20">0</span></div>
-            <div class="text-white/70 text-[12.5px] mt-1.5">سؤال صح وخطأ</div>
-          </div>
-          <div class="node-card p-4 reveal in" style="--d:400ms">
-            <div class="stat-num text-3xl text-gold-400"><span class="count" data-target="37">0</span></div>
-            <div class="text-white/70 text-[12.5px] mt-1.5">اختيار من متعدد</div>
-          </div>
-          <div class="node-card p-4 reveal in" style="--d:460ms">
-            <div class="stat-num text-3xl text-gold-400"><span class="count" data-target="100">0</span><span class="text-xl">%</span></div>
-            <div class="text-white/70 text-[12.5px] mt-1.5">ترجمة فورية</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- visual -->
-      <div class="lg:col-span-5 reveal-scale in">
-        <div class="relative">
-          <div class="node-card p-6 sm:p-7 float-slow">
-            <div class="flex items-center justify-between mb-5">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#E7684A]"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-[#E7C274]"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-[#5BD6A2]"></span>
-              </div>
-              <div class="text-gold-400/80 text-[11px] font-en tracking-widest">linked_list.c</div>
-            </div>
-
-            <svg viewBox="0 0 340 170" class="w-full h-auto">
-              <defs>
-                <linearGradient id="nodeGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#1C7160"/><stop offset="100%" stop-color="#0B2E27"/>
-                </linearGradient>
-              </defs>
-              <!-- links -->
-              <path class="link-path" d="M62 62 H92" stroke="#E7C274" stroke-width="2.5" stroke-linecap="round"/>
-              <path class="link-path" style="animation-delay:.25s" d="M152 62 H182" stroke="#E7C274" stroke-width="2.5" stroke-linecap="round"/>
-              <path class="link-path" style="animation-delay:.5s" d="M242 62 H272" stroke="#E7C274" stroke-width="2.5" stroke-linecap="round"/>
-
-              <!-- nodes -->
-              <g class="pulse-node">
-                <rect x="6" y="36" width="56" height="52" rx="14" fill="url(#nodeGrad)" stroke="#E7C274" stroke-width="1.6"/>
-                <text x="34" y="68" text-anchor="middle" fill="#F3E6C8" font-family="Sora" font-size="17" font-weight="700">10</text>
-              </g>
-              <g class="pulse-node" style="animation-delay:.4s">
-                <rect x="96" y="36" width="56" height="52" rx="14" fill="url(#nodeGrad)" stroke="#E7C274" stroke-width="1.6"/>
-                <text x="124" y="68" text-anchor="middle" fill="#F3E6C8" font-family="Sora" font-size="17" font-weight="700">20</text>
-              </g>
-              <g class="pulse-node" style="animation-delay:.8s">
-                <rect x="186" y="36" width="56" height="52" rx="14" fill="url(#nodeGrad)" stroke="#E7C274" stroke-width="1.6"/>
-                <text x="214" y="68" text-anchor="middle" fill="#F3E6C8" font-family="Sora" font-size="17" font-weight="700">30</text>
-              </g>
-              <g class="pulse-node" style="animation-delay:1.2s">
-                <rect x="276" y="36" width="56" height="52" rx="14" fill="url(#nodeGrad)" stroke="#E7C274" stroke-width="1.6"/>
-                <text x="304" y="68" text-anchor="middle" fill="#F3E6C8" font-family="Sora" font-size="17" font-weight="700">40</text>
-              </g>
-
-              <!-- head & null labels -->
-              <text x="34" y="112" text-anchor="middle" fill="#E7C274" font-family="Sora" font-size="11" opacity=".95">head</text>
-              <text x="304" y="112" text-anchor="middle" fill="#E7C274" font-family="Sora" font-size="11" opacity=".95">NULL</text>
-
-              <!-- head pointer -->
-              <path d="M34 22 V32" stroke="#E7C274" stroke-width="2" stroke-linecap="round" class="link-path" style="animation-delay:.1s"/>
-              <circle cx="34" cy="18" r="5" fill="#E7C274"/>
-
-              <!-- travelling data packet -->
-              <circle r="5" fill="#5BD6A2">
-                <animateMotion dur="4.2s" repeatCount="indefinite" path="M20 62 H330"/>
-              </circle>
-            </svg>
-
-            <div class="mt-5 space-y-2.5 font-en text-[12.5px] text-white/72">
-              <div><span class="text-gold-400">struct</span> Node { <span class="text-[#8FD8B8]">int</span> data; <span class="text-gold-400">struct</span> Node *next; };</div>
-              <div class="text-white/55">// O(1) insertion at head &nbsp;•&nbsp; O(n) traversal</div>
-            </div>
-          </div>
-
-          <div class="absolute -bottom-7 -left-2 sm:-left-8 node-card px-5 py-4 float-slower">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-gold-500/20 grid place-items-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E7C274" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              </div>
-              <div>
-                <div class="text-white text-[13px] font-semibold">جاهزية للكويز</div>
-                <div class="text-white/60 text-[11px]">مراجعة مركّزة وسريعة</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="absolute bottom-7 left-1/2 -translate-x-1/2 scroll-cue z-10">
-    <span></span>
-  </div>
-</section>
-
-<!-- ============ MARQUEE ============ -->
-<div class="marquee py-3.5">
-  <div class="marquee-track font-en text-[13px] tracking-[0.22em] text-gold-400/90">
-    <div class="flex items-center gap-8 px-4">
-      <span>NODE</span><span class="text-white/25">/</span><span>POINTER</span><span class="text-white/25">/</span>
-      <span>HEAD</span><span class="text-white/25">/</span><span>NULL</span><span class="text-white/25">/</span>
-      <span>O(1) INSERTION</span><span class="text-white/25">/</span><span>O(n) TRAVERSAL</span><span class="text-white/25">/</span>
-      <span>DYNAMIC MEMORY</span><span class="text-white/25">/</span><span>MALLOC</span><span class="text-white/25">/</span>
-      <span>SELF-REFERENTIAL STRUCT</span><span class="text-white/25">/</span>
-    </div>
-    <div class="flex items-center gap-8 px-4">
-      <span>NODE</span><span class="text-white/25">/</span><span>POINTER</span><span class="text-white/25">/</span>
-      <span>HEAD</span><span class="text-white/25">/</span><span>NULL</span><span class="text-white/25">/</span>
-      <span>O(1) INSERTION</span><span class="text-white/25">/</span><span>O(n) TRAVERSAL</span><span class="text-white/25">/</span>
-      <span>DYNAMIC MEMORY</span><span class="text-white/25">/</span><span>MALLOC</span><span class="text-white/25">/</span>
-      <span>SELF-REFERENTIAL STRUCT</span><span class="text-white/25">/</span>
-    </div>
-  </div>
-</div>
-
-<!-- ============ CONCEPTS ============ -->
-<section id="concepts" class="py-24 sm:py-32 scroll-mt-24">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-    <div class="max-w-3xl">
-      <div class="badge badge-gold reveal">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>
-        قبل أن تبدئي
-      </div>
-      <h2 class="mt-5 text-[clamp(1.95rem,4.6vw,3.25rem)] font-bold text-pine-800 leading-[1.35] reveal" style="--d:80ms">
-        خلاصة سريعة لـ <span class="text-gold-700">Single Linked List</span> في دقائق
-      </h2>
-      <p class="mt-5 text-[17px] leading-[2.1] text-pine-800/72 reveal" style="--d:150ms">
-        القائمة المرتبطة المفردة هي بنية خطية غير متجاورة، كل عقدة فيها تحمل البيانات ومؤشراً يشير للعقدة التالية.
-        هذه النقاط الست هي أكثر ما يُسأل عنه في الكويز — راجعيها جيداً قبل الإجابة.
-      </p>
-    </div>
-
-    <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="card p-7 reveal" style="--d:60ms">
-        <div class="concept-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="7" width="12" height="10" rx="3"/><circle cx="19" cy="12" r="2.2"/><path d="M15 12h1.8"/></svg>
-        </div>
-        <h3 class="mt-6 text-[19px] font-bold text-pine-800">بنية العقدة (Node)</h3>
-        <p class="mt-3 text-[14.5px] leading-[2.05] text-pine-800/70">
-          كل عقدة تتكون من حقليْن: بيانات (data) ومؤشر (next) يشير إلى العقدة التالية، ونوعه <span class="font-en text-pine-700">struct Node*</span>.
+        <button class="btn btn-primary" id="btnStart">✦ ابدأي المراجعة الآن ✦</button>
+        <p class="sub" style="margin-top:18px;font-size:.85rem">
+          بالتوفيق يا أبرار، ثقي في نفسكِ… إنتِ قدّها 💚
         </p>
       </div>
+      <p class="foot">أُعدّ هذا الموقع خصيصًا للطالبة <b>أبرار الحربي</b> — مراجعة شابتر <b>Single Linked List</b></p>
+    </div>
+  </section>
 
-      <div class="card p-7 reveal" style="--d:130ms">
-        <div class="concept-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h13"/><path d="m13 6 6 6-6 6"/><circle cx="4" cy="12" r="2"/></svg>
-        </div>
-        <h3 class="mt-6 text-[19px] font-bold text-pine-800">الإدراج (Insertion)</h3>
-        <p class="mt-3 text-[14.5px] leading-[2.05] text-pine-800/70">
-          الإدراج في البداية <span class="font-en text-pine-700">O(1)</span>، أما في النهاية أو عند موضع معيّن فيحتاج المرور عبر العقد <span class="font-en text-pine-700">O(n)</span>.
-        </p>
+  <!-- ================= QUIZ ================= -->
+  <section id="screen-quiz" class="screen">
+    <div class="wrap wide">
+      <div class="quizbar">
+        <div class="qb-info"><span class="qb-avatar">أ</span><span>أبرار الحربي</span></div>
+        <div class="qb-track"><div class="qb-fill" id="qbFill"></div></div>
+        <div class="qb-count" id="qbCount">1 / 57</div>
       </div>
 
-      <div class="card p-7 reveal" style="--d:200ms">
-        <div class="concept-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+      <div class="card" id="qCard">
+        <div class="q-head">
+          <span class="badge" id="qType">صح أو خطأ</span>
+          <span class="q-num" id="qNum">السؤال 1</span>
+          <span class="score-chip" id="scoreChip">⭐ 0</span>
         </div>
-        <h3 class="mt-6 text-[19px] font-bold text-pine-800">الحذف (Deletion)</h3>
-        <p class="mt-3 text-[14.5px] leading-[2.05] text-pine-800/70">
-          حذف العقدة الأولى <span class="font-en text-pine-700">O(1)</span>. أما حذف الأخيرة في القائمة المفردة فيتطلب الوصول إلى العقدة قبل الأخيرة.
-        </p>
-      </div>
 
-      <div class="card p-7 reveal" style="--d:60ms">
-        <div class="concept-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+        <div class="q-body">
+          <p class="q-en" id="qEn" dir="ltr"></p>
+          <p class="q-ar" id="qAr"></p>
         </div>
-        <h3 class="mt-6 text-[19px] font-bold text-pine-800">البحث والمرور (Traversal)</h3>
-        <p class="mt-3 text-[14.5px] leading-[2.05] text-pine-800/70">
-          الوصول للعنصر رقم n يتطلب المرور على كل العقد السابقة → <span class="font-en text-pine-700">O(n)</span>. لا يوجد وصول عشوائي كما في المصفوفات.
-        </p>
-      </div>
 
-      <div class="card p-7 reveal" style="--d:130ms">
-        <div class="concept-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="2"/><rect x="14" y="13" width="7" height="7" rx="2"/><path d="M10 7.5h4a3 3 0 0 1 3 3v2.5"/></svg>
+        <div class="q-tools">
+          <button class="btn-translate" id="btnTr">🌐 ترجم السؤال</button>
         </div>
-        <h3 class="mt-6 text-[19px] font-bold text-pine-800">المقارنة مع المصفوفة</h3>
-        <p class="mt-3 text-[14.5px] leading-[2.05] text-pine-800/70">
-          القائمة المرتبطة ديناميكية الحجم ولا تحتاج إزاحة عناصر عند الإدراج، لكنها تستهلك ذاكرة إضافية للمؤشرات.
-        </p>
-      </div>
 
-      <div class="img-mask reveal min-h-[280px]" style="--d:200ms">
-        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80" alt="طالبة تراجع ملاحظاتها" loading="lazy">
-        <div class="absolute inset-0 z-10 flex flex-col justify-end p-7">
-          <div class="text-gold-400 text-[12px] font-en tracking-[0.22em]">STUDY SMART</div>
-          <div class="text-white text-[21px] font-bold mt-2 leading-[1.7]">التركيز على المفاهيم يصنع الفرق في الكويز</div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+
+        <div class="q-footer">
+          <button class="btn btn-primary" id="btnNext" style="display:none">السؤال التالي ←</button>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============ QUIZ ============ -->
-<section id="quiz" class="py-16 sm:py-24 scroll-mt-24 relative">
-  <div class="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-sand-200/70 to-transparent -z-10"></div>
+  <!-- ================= RESULT ================= -->
+  <section id="screen-result" class="screen">
+    <div class="wrap">
+      <div class="card result-head">
+        <div class="ring" id="ring" style="--p:0">
+          <div class="ring-in"><div><b id="scorePct">0%</b><small>من أول محاولة</small></div></div>
+        </div>
+        <h2 class="result-title" id="resTitle">أحسنتِ يا أبرار!</h2>
+        <p class="result-sub" id="resSub"></p>
 
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="summary">
+          <div class="sum-card g"><b id="sumGood">0</b><span>صحيحة من أول محاولة</span></div>
+          <div class="sum-card a"><b id="sumRetry">0</b><span>بعد المحاولة مرة أخرى</span></div>
+          <div class="sum-card r"><b id="sumWrong">0</b><span>أخطأتِ فيها أول مرة</span></div>
+        </div>
 
-    <div class="text-center max-w-2xl mx-auto">
-      <div class="badge reveal">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        الاختبار التفاعلي
+        <div class="toolbar">
+          <button class="btn btn-ghost" id="btnTrAll">🌐 ترجمة كل الأسئلة</button>
+          <button class="btn btn-primary" id="btnRestart">↻ إعادة المراجعة</button>
+        </div>
       </div>
-      <h2 class="mt-5 text-[clamp(1.95rem,4.6vw,3.15rem)] font-bold text-pine-800 leading-[1.4] reveal" style="--d:80ms">
-        57 سؤالاً تنتظركِ يا أبرار
-      </h2>
-      <p class="mt-4 text-[16.5px] leading-[2.05] text-pine-800/72 reveal" style="--d:150ms">
-        أجيبي بتركيز، وعند كل إجابة ستحصلين على تغذية راجعة فورية. اضغطي زر
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gold-400/20 text-gold-700 font-semibold text-[13px] align-middle">ترجم</span>
-        لعرض ترجمة السؤال والإجابات بجانبه مباشرة.
-      </p>
+
+      <h3 style="margin:26px 0 14px;font-size:1.15rem">📋 التقرير التفصيلي لجميع الأسئلة</h3>
+      <div class="res-list" id="resList"></div>
+
+      <p class="foot">تقرير نتيجة <b>أبرار الحربي</b> — شابتر <b>Single Linked List</b><br>بالتوفيق في الكويز 💚</p>
     </div>
-
-    <!-- progress summary -->
-    <div class="mt-10 grid grid-cols-3 gap-3 sm:gap-4">
-      <div class="card p-4 sm:p-5 text-center reveal" style="--d:60ms">
-        <div class="stat-num text-2xl sm:text-3xl text-pine-800" id="statAnswered">0</div>
-        <div class="text-pine-800/60 text-[12.5px] mt-1.5">تمت الإجابة</div>
-      </div>
-      <div class="card p-4 sm:p-5 text-center reveal" style="--d:120ms">
-        <div class="stat-num text-2xl sm:text-3xl text-[#1B8A5E]" id="statCorrect">0</div>
-        <div class="text-pine-800/60 text-[12.5px] mt-1.5">إجابات صحيحة</div>
-      </div>
-      <div class="card p-4 sm:p-5 text-center reveal" style="--d:180ms">
-        <div class="stat-num text-2xl sm:text-3xl text-[#C2553D]" id="statWrong">0</div>
-        <div class="text-pine-800/60 text-[12.5px] mt-1.5">إجابات خاطئة</div>
-      </div>
-    </div>
-
-    <!-- quiz card -->
-    <div class="quiz-shell mt-8 p-6 sm:p-9 reveal-scale" data-qcard>
-
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <div class="relative w-[70px] h-[70px] flex-none">
-            <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
-              <defs>
-                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#D8A441"/><stop offset="100%" stop-color="#14584A"/>
-                </linearGradient>
-              </defs>
-              <circle cx="40" cy="40" r="33" fill="none" stroke-width="8" class="ring-track"/>
-              <circle id="ringBar" cx="40" cy="40" r="33" fill="none" stroke-width="8" class="ring-bar"
-                      stroke-dasharray="207.3" stroke-dashoffset="207.3"/>
-            </svg>
-            <div class="absolute inset-0 grid place-items-center">
-              <span id="ringPercent" class="font-en text-[13px] font-bold text-pine-800">0%</span>
-            </div>
-          </div>
-          <div>
-            <div id="qCounter" class="text-pine-800 font-bold text-[16px]">السؤال 1 من 57</div>
-            <div class="flex items-center gap-2 mt-2">
-              <span id="qType" class="badge">صح / خطأ</span>
-              <span id="qIndexBadge" class="badge badge-gold font-en">Q1</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2.5">
-          <button id="translateBtn" class="btn inline-flex items-center gap-2 px-4.5 py-2.5 rounded-full border border-gold-500/45 bg-gold-400/12 text-gold-700 font-semibold text-[13px] hover:bg-gold-400/22">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
-            </svg>
-            <span id="translateLabel">ترجم</span>
-          </button>
-          <button id="restartBtn" class="btn inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-pine-800/12 text-pine-800/80 font-semibold text-[13px] hover:border-pine-800/30">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>
-            إعادة
-          </button>
-        </div>
-      </div>
-
-      <!-- question -->
-      <div class="mt-8">
-        <div dir="ltr" class="text-left">
-          <h3 id="qText" class="font-en text-[19px] sm:text-[23px] leading-[1.75] text-pine-800 font-semibold"></h3>
-        </div>
-
-        <div class="tr-panel">
-          <div class="rounded-2xl border border-gold-500/25 bg-gold-400/10 p-4">
-            <div class="flex items-start gap-2.5">
-              <svg class="flex-none mt-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A9791F" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-              <p id="qTextAr" class="text-[15px] leading-[2.05] text-pine-800/85"></p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- options -->
-      <div id="options" class="mt-7 space-y-3.5"></div>
-
-      <!-- feedback -->
-      <div id="feedback" class="feedback mt-6">
-        <div id="fbIcon" class="flex-none w-11 h-11 rounded-full grid place-items-center"></div>
-        <div>
-          <div id="fbTitle" class="font-bold text-[16px]"></div>
-          <div id="fbText" class="text-[13.5px] leading-[1.95] mt-1.5 opacity-90"></div>
-          <div id="fbExp" class="text-[13px] leading-[1.95] mt-2.5 text-pine-800/75"></div>
-        </div>
-      </div>
-
-      <!-- navigation -->
-      <div class="mt-8 flex items-center justify-between gap-3">
-        <button id="prevBtn" class="btn inline-flex items-center gap-2 px-6 py-3.5 rounded-full border border-pine-800/12 font-semibold text-[14px] text-pine-800 hover:border-pine-800/30">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          السابق
-        </button>
-
-        <div class="text-[12.5px] text-pine-800/55 text-center hidden sm:block">
-          التغذية الراجعة فورية بعد كل إجابة
-        </div>
-
-        <button id="nextBtn" class="btn btn-sweep inline-flex items-center gap-2 px-7 py-3.5 rounded-full btn-dark font-bold text-[14px]">
-          التالي
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- palette -->
-    <div class="card mt-8 p-6 sm:p-7 reveal">
-      <div class="flex items-center justify-between flex-wrap gap-3">
-        <h4 class="font-bold text-pine-800 text-[16px]">خريطة الأسئلة</h4>
-        <div class="flex items-center gap-4 text-[12px] text-pine-800/65">
-          <span class="flex items-center gap-2"><i class="status-dot" style="background:#1B8A5E"></i> صحيح</span>
-          <span class="flex items-center gap-2"><i class="status-dot" style="background:#C2553D"></i> خطأ</span>
-          <span class="flex items-center gap-2"><i class="status-dot" style="background:#fff;border:1.5px solid rgba(11,46,39,.2)"></i> لم يُجب</span>
-        </div>
-      </div>
-      <div id="palette" class="mt-5 grid grid-cols-6 sm:grid-cols-9 md:grid-cols-12 lg:grid-cols-15 gap-2.5"></div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ============ RESULT ============ -->
-<section id="result" class="relative py-20 sm:py-28 scroll-mt-24 overflow-hidden">
-  <div class="absolute inset-0 bg-pine-800 -z-10"></div>
-  <div class="absolute inset-0 -z-10 opacity-[.32]" style="background-image:url('https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=1800&q=80');background-size:cover;background-position:center;"></div>
-  <div class="absolute inset-0 -z-10" style="background:linear-gradient(180deg, rgba(7,34,29,.94), rgba(11,46,39,.97) 55%, rgba(7,34,29,.98));"></div>
-
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-    <div class="text-center max-w-2xl mx-auto">
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gold-400/35 bg-gold-400/10 text-gold-400 text-[12.5px] font-medium reveal">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M17 4H7v6a5 5 0 0 0 10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
-        التقرير النهائي
-      </div>
-      <h2 class="mt-5 text-white font-bold text-[clamp(1.95rem,4.6vw,3.15rem)] leading-[1.4] reveal" style="--d:80ms">
-        نتيجتكِ يا <span class="shine">أبرار الحربي</span>
-      </h2>
-      <p class="mt-4 text-white/72 text-[16.5px] leading-[2.05] reveal" style="--d:150ms">
-        تقرير شامل يوضح الأسئلة التي أجبتِ عنها صحيحة، والأسئلة التي أخطأتِ فيها مع الإجابة النموذجية لكل سؤال.
-      </p>
-    </div>
-
-    <!-- score panel -->
-    <div class="mt-12 rounded-[32px] border border-white/10 bg-white/[0.055] p-7 sm:p-10 reveal-scale">
-      <div class="grid lg:grid-cols-12 gap-10 items-center">
-
-        <div class="lg:col-span-4 flex flex-col items-center">
-          <div class="relative w-[228px] h-[228px] score-ring">
-            <svg viewBox="0 0 220 220" class="w-full h-full -rotate-90">
-              <defs>
-                <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#E7C274"/><stop offset="60%" stop-color="#D8A441"/><stop offset="100%" stop-color="#5BD6A2"/>
-                </linearGradient>
-              </defs>
-              <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="17"/>
-              <circle id="scoreArc" cx="110" cy="110" r="92" fill="none" stroke="url(#scoreGrad)" stroke-width="17"
-                      stroke-linecap="round" stroke-dasharray="578" stroke-dashoffset="578"
-                      style="transition:stroke-dashoffset 1.6s cubic-bezier(.22,.9,.28,1)"/>
-            </svg>
-            <div class="absolute inset-0 grid place-items-center text-center">
-              <div>
-                <div class="stat-num text-[52px] text-white leading-none"><span id="scorePercent">0</span><span class="text-2xl">%</span></div>
-                <div id="scoreLabel" class="text-gold-400 text-[13px] mt-2 font-semibold">جارٍ التقييم...</div>
-              </div>
-            </div>
-          </div>
-
-          <button id="printBtn" class="btn mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full btn-ghost text-[13.5px] font-semibold">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-            طباعة التقرير
-          </button>
-        </div>
-
-        <div class="lg:col-span-8">
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-center">
-              <div class="stat-num text-[30px] text-white"><span class="count2" data-target="57" id="totalOut">57</span></div>
-              <div class="text-white/62 text-[12px] mt-1.5">إجمالي الأسئلة</div>
-            </div>
-            <div class="rounded-2xl border border-[#5BD6A2]/22 bg-[#5BD6A2]/12 p-5 text-center">
-              <div class="stat-num text-[30px] text-[#7FE6B7]" id="finalCorrect">0</div>
-              <div class="text-white/62 text-[12px] mt-1.5">إجابة صحيحة</div>
-            </div>
-            <div class="rounded-2xl border border-[#E7684A]/22 bg-[#E7684A]/12 p-5 text-center">
-              <div class="stat-num text-[30px] text-[#F09078]" id="finalWrong">0</div>
-              <div class="text-white/62 text-[12px] mt-1.5">إجابة خاطئة</div>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-center">
-              <div class="stat-num text-[30px] text-gold-400" id="finalTime">00:00</div>
-              <div class="text-white/62 text-[12px] mt-1.5">الوقت المستغرق</div>
-            </div>
-          </div>
-
-          <div class="mt-6 rounded-2xl border border-gold-400/25 bg-gold-400/[0.09] p-5">
-            <div class="flex items-start gap-3">
-              <div class="flex-none w-10 h-10 rounded-full bg-gold-400/22 grid place-items-center">
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E7C274" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 8.5 22 9.5l-5 4.8 1.2 6.9-6.2-3.3-6.2 3.3L7 14.3 2 9.5 9 8.5z"/></svg>
-              </div>
-              <div>
-                <div class="text-white font-bold text-[15px]">ملاحظة التقييم</div>
-                <p id="finalNote" class="text-white/72 text-[13.5px] leading-[2] mt-1.5">
-                  أكملي الأسئلة لتظهر النتيجة النهائية والتقرير المفصّل.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6">
-            <div class="flex items-center justify-between text-white/70 text-[12.5px] mb-2.5">
-              <span>نسبة الإنجاز</span>
-              <span id="progressLabel" class="font-en">0 / 57</span>
-            </div>
-            <div class="h-2.5 rounded-full bg-white/10 overflow-hidden">
-              <div id="progressBar" class="h-full rounded-full bg-gradient-to-l from-gold-500 to-[#5BD6A2] transition-[width] duration-1000" style="width:0%"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- report list -->
-    <div class="mt-12">
-      <div class="flex items-center justify-between flex-wrap gap-4">
-        <h3 class="text-white font-bold text-[21px] sm:text-[25px]">تفاصيل الإجابات</h3>
-        <div class="flex items-center gap-2">
-          <button id="filterAll" class="filter-btn px-4 py-2 rounded-full text-[12.5px] font-semibold bg-white/12 text-white border border-white/12">الكل</button>
-          <button id="filterCorrect" class="filter-btn px-4 py-2 rounded-full text-[12.5px] font-semibold text-white/72 border border-white/12 hover:bg-white/8">الصحيحة</button>
-          <button id="filterWrong" class="filter-btn px-4 py-2 rounded-full text-[12.5px] font-semibold text-white/72 border border-white/12 hover:bg-white/8">الخاطئة</button>
-        </div>
-      </div>
-
-      <div id="reportList" class="mt-7 space-y-4"></div>
-
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-3.5 no-print">
-        <button id="restartBtn2" class="btn btn-sweep magnetic inline-flex items-center gap-2.5 px-8 py-4 rounded-full btn-gold font-bold text-[15px]">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>
-          إعادة الاختبار من البداية
-        </button>
-        <a href="#quiz" class="btn magnetic inline-flex items-center gap-2.5 px-8 py-4 rounded-full btn-ghost font-semibold text-[15px]">
-          العودة إلى الأسئلة
-        </a>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ============ CTA ============ -->
-<section class="py-20 sm:py-28">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="relative rounded-[32px] overflow-hidden card p-9 sm:p-14 text-center">
-      <div class="absolute inset-0 opacity-[0.07]" style="background-image:radial-gradient(circle at 20% 20%, #0F4438 0, transparent 45%), radial-gradient(circle at 80% 70%, #D8A441 0, transparent 45%)"></div>
-      <div class="relative">
-        <div class="text-gold-700 text-[12.5px] font-en tracking-[0.24em] reveal">YOU'VE GOT THIS</div>
-        <h3 class="mt-5 text-[clamp(1.75rem,4vw,2.75rem)] font-bold text-pine-800 leading-[1.5] reveal" style="--d:80ms">
-          ثقي بنفسكِ يا أبرار،<br class="hidden sm:block"> فالتركيز والمراجعة يصنعان النتيجة المميزة.
-        </h3>
-        <p class="mt-5 text-pine-800/70 text-[16px] leading-[2.1] max-w-2xl mx-auto reveal" style="--d:150ms">
-          راجعي الأسئلة التي أخطأتِ فيها، انتبهي للتفاصيل في التعريفات وتعقيدات العمليات،
-          وستدخلين الكويز وأنتِ مستعدة تماماً.
-        </p>
-        <a href="#quiz" class="btn btn-sweep magnetic mt-9 inline-flex items-center gap-2.5 px-9 py-4 rounded-full btn-dark font-bold text-[15px] reveal" style="--d:220ms">
-          ابدئي التدرب الآن
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
+  </section>
 </main>
 
-<!-- ============ FOOTER ============ -->
-<footer class="bg-pine-900 pt-16 pb-9">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid md:grid-cols-3 gap-10">
-      <div>
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-white/[0.07] grid place-items-center border border-gold-400/25">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <circle cx="6" cy="12" r="3.2" stroke="#E7C274" stroke-width="1.8"/>
-              <circle cx="18" cy="12" r="3.2" stroke="#E7C274" stroke-width="1.8" opacity=".55"/>
-              <path d="M9.4 12h5.2" stroke="#E7C274" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div>
-            <div class="text-white font-bold text-[15px]">منصة مراجعة أبرار</div>
-            <div class="text-gold-400/80 text-[11.5px] font-en tracking-wider">Single Linked Lists</div>
-          </div>
-        </div>
-        <p class="mt-5 text-white/58 text-[13.5px] leading-[2.05] max-w-sm">
-          محتوى تعليمي تفاعلي مصمَّم لمراجعة القوائم المرتبطة المفردة والاستعداد للكويز بثقة وتركيز.
-        </p>
-      </div>
-
-      <div>
-        <h4 class="text-white font-semibold text-[14.5px]">أقسام الموقع</h4>
-        <div class="divider-gold my-4"></div>
-        <ul class="space-y-3 text-white/58 text-[13.5px]">
-          <li><a href="#home" class="hover:text-gold-400 transition-colors duration-300">الصفحة الرئيسية</a></li>
-          <li><a href="#concepts" class="hover:text-gold-400 transition-colors duration-300">المفاهيم الأساسية</a></li>
-          <li><a href="#quiz" class="hover:text-gold-400 transition-colors duration-300">الاختبار التفاعلي</a></li>
-          <li><a href="#result" class="hover:text-gold-400 transition-colors duration-300">تقرير النتيجة</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="text-white font-semibold text-[14.5px]">تذكير سريع</h4>
-        <div class="divider-gold my-4"></div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
-          <p class="text-white/72 text-[13.5px] leading-[2.05]">
-            « الإعداد الجيد نصف النجاح. » راجعي العقدة، المؤشر، الـ head، و الـ NULL — وستكونين جاهزة.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-12 pt-7 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="text-white/45 text-[12.5px]">© 2025 — جميع الحقوق محفوظة | إعداد خاص للطالبة أبرار الحربي</div>
-      <div class="flex items-center gap-2.5">
-        <span class="text-white/45 text-[12px] font-en tracking-wider">DESIGNED WITH CARE</span>
-        <span class="w-1.5 h-1.5 rounded-full bg-gold-400"></span>
-      </div>
-    </div>
-  </div>
-</footer>
-
 <script>
-/* =========================================================
-   QUESTIONS DATA — Single Linked Lists (57 questions)
-   20 True/False  +  37 Multiple Choice
-   ========================================================= */
-const QUESTIONS = [
-  /* ---------- TRUE / FALSE (1-20) ---------- */
-  { t:'tf', q:'A linked list is a linear data structure where elements are stored in contiguous memory locations.',
-    ar:'القائمة المرتبطة هي بنية خطية يتم فيها تخزين العناصر في مواقع ذاكرة متجاورة.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'العناصر في القائمة المرتبطة غير متجاورة؛ كل عقدة ترتبط بالتي تليها عبر مؤشر (next).' },
+/* =====================================================================
+   DATA — 57 Questions (20 True/False + 37 Multiple Choice)
+   ===================================================================== */
+const DATA = [
+/* ---------- TRUE / FALSE (1 - 20) ---------- */
+{tf:1,q:"A singly linked list is a linear data structure in which each node stores data and a pointer to the next node.",ar:"القائمة المترابطة الأحادية بنية بيانات خطية، تُخزّن فيها كل عقدة البيانات ومؤشّرًا إلى العقدة التالية.",a:0},
+{tf:1,q:"In a singly linked list, every node contains a pointer to both the next and the previous node.",ar:"في القائمة المترابطة الأحادية، تحتوي كل عقدة على مؤشّرين: مؤشّر للعقدة التالية ومؤشّر للعقدة السابقة.",a:1},
+{tf:1,q:"The next pointer of the last node in a singly linked list is set to NULL.",ar:"مؤشّر العقدة الأخيرة في القائمة الأحادية يُضبط على القيمة NULL.",a:0},
+{tf:1,q:"Inserting a new node at the beginning of a singly linked list requires traversing the entire list.",ar:"إدخال عقدة جديدة في بداية القائمة الأحادية يتطلّب المرور على القائمة كاملة.",a:1},
+{tf:1,q:"A singly linked list provides random access to any element in O(1) time.",ar:"توفّر القائمة الأحادية وصولًا عشوائيًا مباشرًا لأي عنصر بزمن O(1).",a:1},
+{tf:1,q:"The head pointer stores the address of the first node in the list.",ar:"مؤشّر الرأس (head) يحفظ عنوان العقدة الأولى في القائمة.",a:0},
+{tf:1,q:"Deleting a node from the middle of a singly linked list requires updating the next pointer of the previous node.",ar:"حذف عقدة من منتصف القائمة الأحادية يتطلّب تحديث مؤشّر العقدة السابقة لها.",a:0},
+{tf:1,q:"The size of a singly linked list is fixed at compile time.",ar:"حجم القائمة الأحادية ثابت ويُحدَّد وقت الترجمة (Compile time).",a:1},
+{tf:1,q:"A linked list uses extra memory per element for storing pointers compared to an array.",ar:"تستهلك القائمة المترابطة ذاكرة إضافية لكل عنصر لتخزين المؤشّرات مقارنة بالمصفوفة.",a:0},
+{tf:1,q:"Traversal in a singly linked list is possible in one direction only.",ar:"المرور (Traversal) في القائمة الأحادية ممكن في اتجاه واحد فقط.",a:0},
+{tf:1,q:"Inserting a node at the end of a singly linked list when only the head pointer is available takes O(1) time.",ar:"إدخال عقدة في نهاية القائمة الأحادية عند توفّر مؤشّر الرأس فقط يستغرق زمن O(1).",a:1},
+{tf:1,q:"A node in a singly linked list typically consists of a data field and a next pointer field.",ar:"تتكوّن العقدة في القائمة الأحادية عادةً من حقل البيانات وحقل المؤشّر إلى العقدة التالية.",a:0},
+{tf:1,q:"Searching for an element in an unsorted singly linked list of n nodes is O(n) in the worst case.",ar:"البحث عن عنصر في قائمة أحادية غير مرتّبة تحتوي n عقدة يستغرق O(n) في أسوأ الحالات.",a:0},
+{tf:1,q:"From a given node in a singly linked list, you can directly access the previous node.",ar:"من عقدة معيّنة في القائمة الأحادية يمكنك الوصول مباشرةً إلى العقدة السابقة.",a:1},
+{tf:1,q:"Nodes of a linked list are usually allocated dynamically at runtime.",ar:"عادةً ما تُخصَّص عقد القائمة المترابطة ديناميكيًا وقت التنفيذ.",a:0},
+{tf:1,q:"A singly linked list can be reversed in O(n) time using three pointers.",ar:"يمكن عكس القائمة الأحادية بزمن O(n) باستخدام ثلاثة مؤشّرات.",a:0},
+{tf:1,q:"In a singly linked list the next pointer of the tail node points back to the head node.",ar:"في القائمة الأحادية، مؤشّر العقدة الأخيرة يشير عائدًا إلى العقدة الأولى (الرأس).",a:1},
+{tf:1,q:"When the position is known, insertion and deletion in a linked list are more efficient than in an array.",ar:"عند معرفة الموضع، فإن الإدخال والحذف في القائمة المترابطة أكفأ من المصفوفة.",a:0},
+{tf:1,q:"The time complexity of inserting a node at the head of a singly linked list is O(n).",ar:"التعقيد الزمني لإدخال عقدة في مقدّمة القائمة الأحادية هو O(n).",a:1},
+{tf:1,q:"If the head pointer of a singly linked list is lost, the whole list becomes inaccessible.",ar:"إذا فُقد مؤشّر الرأس في القائمة الأحادية، تصبح القائمة كاملة غير قابلة للوصول.",a:0},
 
-  { t:'tf', q:'In a singly linked list, each node contains data and a reference (link) to the next node.',
-    ar:'في القائمة المرتبطة المفردة، تحتوي كل عقدة على بيانات ومرجع (رابط) للعقدة التالية.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'هذا هو التعريف الأساسي لعقدة القائمة المفردة: data + next pointer.' },
+/* ---------- MULTIPLE CHOICE (21 - 57) ---------- */
+{q:"What is a singly linked list?",ar:"ما هي القائمة المترابطة الأحادية؟",o:[
+ ["A linear data structure made of nodes, where each node stores data and a pointer to the next node","بنية بيانات خطية مكوّنة من عُقد، تخزّن كل عقدة بيانات ومؤشّرًا إلى العقدة التالية"],
+ ["A data structure that stores its elements in contiguous memory locations","بنية بيانات تخزّن عناصرها في مواقع ذاكرة متجاورة"],
+ ["A data structure in which each node contains two pointers (next and previous)","بنية بيانات تحتوي كل عقدة فيها على مؤشّرين (تالي وسابق)"],
+ ["A hierarchical data structure of parent and child nodes","بنية بيانات هرمية من عُقد أب وابن"]],a:0},
 
-  { t:'tf', q:'The last node of a singly linked list points to NULL.',
-    ar:'تشير العقدة الأخيرة في القائمة المرتبطة المفردة إلى NULL.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'قيمة NULL في مؤشر العقدة الأخيرة تعني نهاية القائمة.' },
+{q:"Which of the following is NOT a component of a node in a singly linked list?",ar:"أيٌّ ممّا يلي ليس مكوّنًا من مكوّنات العقدة في القائمة الأحادية؟",o:[
+ ["Data field","حقل البيانات"],
+ ["Pointer to the next node","مؤشّر إلى العقدة التالية"],
+ ["Pointer to the previous node","مؤشّر إلى العقدة السابقة"],
+ ["Node identifier (an index number for the node)","معرّف العقدة (رقم فهرس للعقدة)"]],a:2},
 
-  { t:'tf', q:'Inserting a node at the beginning of a singly linked list takes O(1) time.',
-    ar:'إدراج عقدة في بداية القائمة المرتبطة المفردة يستغرق وقتاً مقداره O(1).',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'الإدراج في البداية يحتاج فقط لتحديث مؤشر head → ثابت الزمن O(1).' },
+{q:"What is the time complexity of inserting a new node at the beginning of a singly linked list?",ar:"ما هو التعقيد الزمني لإدخال عقدة جديدة في بداية القائمة الأحادية؟",o:[
+ ["O(1)","O(1) — زمن ثابت"],
+ ["O(n)","O(n) — خطي"],
+ ["O(log n)","O(log n) — لوغاريتمي"],
+ ["O(n²)","O(n²) — تربيعي"]],a:0},
 
-  { t:'tf', q:'Accessing the nth element in a linked list takes O(1) time.',
-    ar:'الوصول إلى العنصر رقم n في القائمة المرتبطة يستغرق وقتاً مقداره O(1).',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'لا يوجد وصول عشوائي؛ يجب المرور على العقد بالتتابع → O(n).' },
+{q:"What is the time complexity of deleting the first node of a singly linked list?",ar:"ما هو التعقيد الزمني لحذف العقدة الأولى من القائمة الأحادية؟",o:[
+ ["O(1)","O(1) — زمن ثابت"],
+ ["O(n)","O(n) — خطي"],
+ ["O(log n)","O(log n) — لوغاريتمي"],
+ ["O(n log n)","O(n log n)"]],a:0},
 
-  { t:'tf', q:'Arrays are better than linked lists for frequent insertions and deletions in the middle.',
-    ar:'المصفوفات أفضل من القوائم المرتبطة للإدراج والحذف المتكرر في الوسط.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'الإدراج/الحذف في المصفوفة يتطلب إزاحة العناصر O(n)، بينما القائمة المرتبطة أسهل بكثير.' },
+{q:"To insert a new node after a node p in a singly linked list, which statements are correct?",ar:"لإدخال عقدة جديدة بعد العقدة p في القائمة الأحادية، أي العبارات صحيحة؟",o:[
+ ["newNode->next = p->next;  p->next = newNode;","نُسند للعقدة الجديدة مؤشّر التالية للعقدة p، ثم نجعل p تشير إلى العقدة الجديدة"],
+ ["p->next = newNode;  newNode->next = p->next;","نجعل p تشير إلى العقدة الجديدة أولًا ثم نُسند — ترتيب خاطئ يفقد بقية القائمة"],
+ ["newNode->next = p;  p->next = newNode;","هذا يجعل العقدة الجديدة تشير إلى p نفسها (حلقة خاطئة)"],
+ ["p->next = newNode->next;  newNode = p->next;","ترتيب غير صحيح ولا يحقّق الإدخال"]],a:0},
 
-  { t:'tf', q:'The size of a linked list must be defined at compile time.',
-    ar:'يجب تحديد حجم القائمة المرتبطة في وقت الترجمة (الترجمة المسبقة).',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'القوائم المرتبطة ديناميكية، يُحدد حجمها وقت التشغيل عبر التخصيص الديناميكي للذاكرة.' },
+{q:"What is the value of the next pointer of the last node in a singly linked list?",ar:"ما قيمة مؤشّر (next) في العقدة الأخيرة من القائمة الأحادية؟",o:[
+ ["NULL","القيمة NULL (لا شيء)"],
+ ["The address of the head node","عنوان عقدة الرأس"],
+ ["Its own address","عنوانها الخاص"],
+ ["A random garbage value","قيمة عشوائية غير محدّدة"]],a:0},
 
-  { t:'tf', q:'A singly linked list can be traversed in both directions easily.',
-    ar:'يمكن المرور في القائمة المرتبطة المفردة بسهولة في الاتجاهين.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'القائمة المفردة تدعم الاتجاه الأمامي فقط؛ الاتجاه الخلفي يحتاج قائمة مزدوجة.' },
+{q:"What is the main advantage of a linked list over an array?",ar:"ما هي الميزة الأساسية للقائمة المترابطة مقارنة بالمصفوفة؟",o:[
+ ["Dynamic size with efficient insertion and deletion","الحجم الديناميكي مع كفاءة الإدخال والحذف"],
+ ["Faster random access to elements","وصول عشوائي أسرع للعناصر"],
+ ["It uses less memory per element","تستهلك ذاكرة أقل لكل عنصر"],
+ ["Its elements are stored contiguously","عناصرها مخزّنة في مواقع متجاورة"]],a:0},
 
-  { t:'tf', q:'Deleting the last node of a singly linked list requires traversal to the second last node.',
-    ar:'حذف العقدة الأخيرة في القائمة المفردة يتطلب الوصول إلى العقدة قبل الأخيرة.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'لأن العقدة قبل الأخيرة هي التي يشير مؤشرها next إلى العقدة الأخيرة.' },
+{q:"What is the main disadvantage of a singly linked list compared to an array?",ar:"ما هي العيب الأساسي للقائمة الأحادية مقارنة بالمصفوفة؟",o:[
+ ["No direct (random) access to elements — you must traverse","لا يوجد وصول مباشر (عشوائي) للعناصر — يجب المرور عليها"],
+ ["Its size is fixed","حجمها ثابت"],
+ ["Insertion is always O(n)","الإدخال دائمًا بزمن O(n)"],
+ ["It cannot store more than 100 elements","لا يمكنها تخزين أكثر من 100 عنصر"]],a:0},
 
-  { t:'tf', q:'Dynamic memory allocation is used to create nodes of a linked list.',
-    ar:'يُستخدم التخصيص الديناميكي للذاكرة لإنشاء عقد القائمة المرتبطة.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'العقد تُنشأ عبر دوال مثل malloc() أثناء تشغيل البرنامج.' },
+{q:"Given a pointer p to a node (not the last node), how do you delete the node that comes after p?",ar:"بمعرفة المؤشّر p لعقدة (ليست الأخيرة)، كيف تحذف العقدة التي تأتي بعدها؟",o:[
+ ["temp = p->next;  p->next = temp->next;  free(temp);","نحفظ العقدة التالية في temp، ثم نربط p بما بعدها، ثم نحرّر الذاكرة"],
+ ["p->next = p->next->next->next;","هذا يتخطّى عقدتين وليس عقدة واحدة"],
+ ["free(p->next);","تحرير بدون إعادة الربط يقطع السلسلة ويسبب فقدان بقية القائمة"],
+ ["temp = p;  p = p->next;  free(temp);","هذا يحذف العقدة p نفسها وليس التي بعدها"]],a:0},
 
-  { t:'tf', q:'In a singly linked list, the head pointer points to the first node.',
-    ar:'في القائمة المرتبطة المفردة، يشير مؤشر head إلى العقدة الأولى.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'head هو نقطة الدخول للقائمة، وإذا كان NULL فالقائمة فارغة.' },
+{q:"What happens if the head pointer of a singly linked list is lost?",ar:"ماذا يحدث إذا فُقد مؤشّر الرأس (head) في القائمة الأحادية؟",o:[
+ ["All nodes become unreachable (memory leak)","تصبح كل العقد غير قابلة للوصول (تسريب في الذاكرة)"],
+ ["Only the first node is lost","تُفقد العقدة الأولى فقط"],
+ ["The list is automatically reversed","تُعكس القائمة تلقائيًا"],
+ ["Nothing happens, the list can still be traversed","لا يحدث شيء، ويمكن المرور على القائمة"]],a:0},
 
-  { t:'tf', q:'A linked list uses more memory per element than an array due to the link field.',
-    ar:'تستهلك القائمة المرتبطة ذاكرة أكبر لكل عنصر من المصفوفة بسبب حقل الرابط.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'كل عقدة تحفظ مؤشراً إضافياً next بالإضافة إلى البيانات.' },
+{q:"How many pointer fields does a node contain in a singly linked list?",ar:"كم عدد حقول المؤشّرات في عقدة القائمة الأحادية؟",o:[
+ ["One","واحد"],
+ ["Two","اثنان"],
+ ["Three","ثلاثة"],
+ ["None","لا يوجد"]],a:0},
 
-  { t:'tf', q:'Searching in a linked list is faster than in a sorted array.',
-    ar:'البحث في القائمة المرتبطة أسرع من البحث في مصفوفة مرتبة.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'البحث في القائمة O(n)، بينما المصفوفة المرتبة تدعم البحث الثنائي O(log n).' },
+{q:"What is the worst-case time complexity of searching for a value in a singly linked list of n nodes?",ar:"ما هو أسوأ تعقيد زمني للبحث عن قيمة في قائمة أحادية تحتوي n عقدة؟",o:[
+ ["O(n)","O(n)"],
+ ["O(1)","O(1)"],
+ ["O(log n)","O(log n)"],
+ ["O(n log n)","O(n log n)"]],a:0},
 
-  { t:'tf', q:'If the head of a linked list is NULL, the list is empty.',
-    ar:'إذا كان مؤشر head يساوي NULL فالقائمة المرتبطة فارغة.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'لا توجد عقدة يمكن الوصول إليها → القائمة فارغة.' },
+{q:"Which operation is inefficient (or not directly possible) in a singly linked list?",ar:"أي عملية غير كفؤة (أو غير ممكنة مباشرة) في القائمة الأحادية؟",o:[
+ ["Moving backwards / accessing the previous node","التحرّك للخلف / الوصول إلى العقدة السابقة"],
+ ["Inserting at the head","الإدخال في المقدّمة"],
+ ["Deleting the head","حذف العقدة الأولى"],
+ ["Traversing forward","المرور للأمام"]],a:0},
 
-  { t:'tf', q:'We can insert a node after a given node without traversing the list if we have a pointer to that node.',
-    ar:'يمكن إدراج عقدة بعد عقدة محددة دون المرور على القائمة إذا توفر لدينا مؤشر لها.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'يتم تعديل المؤشرات مباشرة: newNode->next = p->next ثم p->next = newNode.' },
+{q:"Inserting a new node at the end of a singly linked list that has only a head pointer takes:",ar:"إدخال عقدة جديدة في نهاية قائمة أحادية لديها مؤشّر رأس (head) فقط يستغرق:",o:[
+ ["O(n)","O(n)"],
+ ["O(1)","O(1)"],
+ ["O(log n)","O(log n)"],
+ ["O(n²)","O(n²)"]],a:0},
 
-  { t:'tf', q:'Reversing a singly linked list iteratively requires extra memory proportional to the number of nodes.',
-    ar:'عكس القائمة المفردة بشكل تكراري يتطلب ذاكرة إضافية تتناسب مع عدد العقد.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'العكس التكراري يستخدم ثلاثة مؤشرات فقط → ذاكرة إضافية ثابتة O(1).' },
+{q:"Which data structure is naturally implemented using a singly linked list with push and pop at the head?",ar:"أي بنية بيانات تُنفَّذ بشكل طبيعي باستخدام قائمة أحادية مع الإضافة والحذف من المقدّمة؟",o:[
+ ["Stack","المكدّس (Stack)"],
+ ["Queue","الطابور (Queue)"],
+ ["Binary tree","الشجرة الثنائية"],
+ ["Priority queue","طابور الأولوية"]],a:0},
 
-  { t:'tf', q:'In a circular linked list, the last node points back to the first node.',
-    ar:'في القائمة المرتبطة الدائرية، تشير العقدة الأخيرة إلى العقدة الأولى.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'الفرق الجوهري بين الدائرية والمفردة هو أن الأخيرة تشير إلى head بدل NULL.' },
+{q:"Which statement correctly allocates memory for a new node in C?",ar:"أي عبارة تخصّص الذاكرة بشكل صحيح لعقدة جديدة في لغة C؟",o:[
+ ["struct Node* n = (struct Node*)malloc(sizeof(struct Node));","تخصيص ذاكرة بحجم بنية العقدة بشكل صحيح"],
+ ["struct Node* n = (struct Node*)malloc(sizeof(struct Node*));","الحجم خاطئ — يخصّص حجم المؤشّر فقط"],
+ ["struct Node n = malloc(sizeof(struct Node));","خطأ: malloc تُعيد مؤشّرًا ولا يمكن إسنادها لبنية مباشرة"],
+ ["Node* n = malloc(sizeof(Node));","غير صحيحة في C بدون كلمة struct (أو بدون تحويل النوع)"]],a:0},
 
-  { t:'tf', q:'In a singly linked list, nodes are always stored in contiguous memory locations.',
-    ar:'في القائمة المرتبطة المفردة، تُخزَّن العقد دائماً في مواقع ذاكرة متجاورة.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:1,
-    exp:'العقد تُوزَّع في الذاكرة بشكل غير متجاور وتنظم عبر المؤشرات.' },
+{q:"In a singly linked list, what does the term \"head\" refer to?",ar:"في القائمة الأحادية، إلى ماذا يشير مصطلح «head» (الرأس)؟",o:[
+ ["A pointer to the first node in the list","مؤشّر إلى العقدة الأولى في القائمة"],
+ ["The last node in the list","العقدة الأخيرة في القائمة"],
+ ["The largest value in the list","أكبر قيمة في القائمة"],
+ ["A dummy node that stores the length","عقدة وهمية تخزّن الطول"]],a:0},
 
-  { t:'tf', q:'Counting the nodes in a linked list has time complexity O(n).',
-    ar:'عدّ عقد القائمة المرتبطة له تعقيد زمني مقداره O(n).',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'يجب المرور على كل عقدة مرة واحدة على الأقل.' },
+{q:"If head == NULL, then the linked list is:",ar:"إذا كان head == NULL فإن القائمة المترابطة تكون:",o:[
+ ["Empty","فارغة"],
+ ["Full","ممتلئة"],
+ ["Circular","دائرية"],
+ ["Corrupted","تالفة"]],a:0},
 
-  { t:'tf', q:'A self-referential structure is a structure that contains a pointer to a structure of the same type.',
-    ar:'البنية ذاتية الإحالة هي بنية تحتوي على مؤشر لبنيّة من نفس النوع.',
-    opts:['True','False'], optAr:['صواب','خطأ'], ans:0,
-    exp:'مثل struct Node { int data; struct Node *next; };' },
+{q:"What does counting the number of nodes in a singly linked list require?",ar:"ما الذي يتطلّبه عدّ عدد العُقد في القائمة الأحادية؟",o:[
+ ["A full traversal from head to tail — O(n)","المرور الكامل من الرأس إلى الذيل — بزمن O(n)"],
+ ["O(1) time if the head is known","زمن O(1) إذا كان الرأس معروفًا"],
+ ["Random access to each index","وصول عشوائي لكل فهرس"],
+ ["Binary search","البحث الثنائي"]],a:0},
 
-  /* ---------- MULTIPLE CHOICE (21-57) ---------- */
-  { t:'mcq', q:'What does a node in a singly linked list contain?',
-    ar:'ماذا تحتوي العقدة في القائمة المرتبطة المفردة؟',
-    opts:['Only data','Data and a pointer to the next node','Data and two pointers','Only a pointer'],
-    optAr:['البيانات فقط','البيانات ومؤشر إلى العقدة التالية','البيانات ومؤشران','مؤشر فقط'], ans:1,
-    exp:'العقدة تضم الحقل data وحقل next الذي يحمل عنوان العقدة التالية.' },
+{q:"Which three pointers are typically used to reverse a singly linked list iteratively?",ar:"أي ثلاثة مؤشّرات تُستخدم عادةً لعكس القائمة الأحادية بطريقة تكرارية؟",o:[
+ ["prev, curr, next","prev و curr و next"],
+ ["head, tail, mid","head و tail و mid"],
+ ["first, last, temp","first و last و temp"],
+ ["left, right, pivot","left و right و pivot"]],a:0},
 
-  { t:'mcq', q:'What is the time complexity of inserting a new node at the beginning of a singly linked list?',
-    ar:'ما هو التعقيد الزمني لإدراج عقدة جديدة في بداية القائمة المفردة؟',
-    opts:['O(1)','O(n)','O(log n)','O(n²)'],
-    optAr:['O(1)','O(n)','O(log n)','O(n²)'], ans:0,
-    exp:'الإدراج في البداية عملية ثابتة الزمن لأننا نغيّر head فقط.' },
+{q:"What is the space complexity of a singly linked list that stores n elements?",ar:"ما هو التعقيد المكاني لقائمة أحادية تخزّن n عنصرًا؟",o:[
+ ["O(n)","O(n)"],
+ ["O(1)","O(1)"],
+ ["O(log n)","O(log n)"],
+ ["O(n²)","O(n²)"]],a:0},
 
-  { t:'mcq', q:'Which pointer is used to access the first node of a linked list?',
-    ar:'أي مؤشر يُستخدم للوصول إلى العقدة الأولى في القائمة المرتبطة؟',
-    opts:['tail','head','top','root'],
-    optAr:['tail','head','top','root'], ans:1,
-    exp:'مؤشر head هو المرجع الأساسي لأول عقدة في القائمة.' },
+{q:"To insert a new node at position i in a singly linked list, you must first:",ar:"لإدخال عقدة جديدة في الموضع i في القائمة الأحادية، يجب أولًا:",o:[
+ ["Traverse to the node at position i-1","المرور حتى العقدة التي في الموضع i-1"],
+ ["Traverse to the node at position i","المرور حتى العقدة التي في الموضع i"],
+ ["Access the element directly using an index","الوصول للعنصر مباشرةً باستخدام الفهرس"],
+ ["Sort the list","ترتيب القائمة"]],a:0},
 
-  { t:'mcq', q:'The next pointer of the last node in a singly linked list contains:',
-    ar:'يحتوي مؤشر next للعقدة الأخيرة في القائمة المفردة على:',
-    opts:['Address of the head node','Address of the previous node','NULL','A garbage value'],
-    optAr:['عنوان العقدة الأولى','عنوان العقدة السابقة','NULL','قيمة عشوائية'], ans:2,
-    exp:'NULL هو العلامة التي تشير إلى نهاية القائمة.' },
+{q:"Which of the following is NOT possible in a singly linked list?",ar:"أيٌّ ممّا يلي غير ممكن في القائمة الأحادية؟",o:[
+ ["Accessing the k-th element directly in O(1)","الوصول إلى العنصر رقم k مباشرةً بزمن O(1)"],
+ ["Inserting a node at the head","إدخال عقدة في المقدّمة"],
+ ["Traversing all nodes forward","المرور على كل العُقد للأمام"],
+ ["Deleting the head node","حذف العقدة الأولى"]],a:0},
 
-  { t:'mcq', q:'Which of the following is a disadvantage of linked lists compared to arrays?',
-    ar:'أي مما يلي يُعدّ عيباً للقوائم المرتبطة مقارنةً بالمصفوفات؟',
-    opts:['Dynamic size','Extra memory for pointers','Easy insertion','No shifting of elements'],
-    optAr:['الحجم الديناميكي','ذاكرة إضافية للمؤشرات','سهولة الإدراج','عدم الحاجة لإزاحة العناصر'], ans:1,
-    exp:'كل عقدة تحتاج مساحة إضافية لتخزين المؤشر next.' },
+{q:"If you are given only a pointer to a node that is NOT the last node, how can you delete it?",ar:"إذا أُعطيت فقط مؤشّرًا لعقدة ليست الأخيرة، كيف يمكنك حذفها؟",o:[
+ ["Copy the data of the next node into it, then delete the next node","ننسخ بيانات العقدة التالية إليها، ثم نحذف العقدة التالية"],
+ ["Free the node directly and set it to NULL","نحرّر العقدة مباشرةً ونجعلها NULL"],
+ ["Set the node's next pointer to NULL","نجعل مؤشّر التالي للعقدة NULL"],
+ ["It is impossible","هذا مستحيل"]],a:0},
 
-  { t:'mcq', q:'To traverse a linked list, we must start from:',
-    ar:'للمرور على القائمة المرتبطة يجب أن نبدأ من:',
-    opts:['The last node','The head node','Any node','The middle node'],
-    optAr:['العقدة الأخيرة','عقدة head','أي عقدة','العقدة الوسطى'], ans:1,
-    exp:'head هي نقطة البداية الطبيعية للمرور على القائمة.' },
+{q:"How is memory for linked list nodes usually allocated?",ar:"كيف تُخصَّص الذاكرة لعُقد القائمة المترابطة عادةً؟",o:[
+ ["Dynamically at runtime","ديناميكيًا وقت التنفيذ"],
+ ["Statically on the stack at compile time","ثابتًا على المكدّس وقت الترجمة"],
+ ["In a contiguous block on the stack","في كتلة متجاورة على المكدّس"],
+ ["It is not allocated at all","لا تُخصَّص إطلاقًا"]],a:0},
 
-  { t:'mcq', q:'Which of the following is required to create a linked list in C?',
-    ar:'أي مما يلي مطلوب لإنشاء قائمة مرتبطة في لغة C؟',
-    opts:['An array','A self-referential structure','A stack','A queue'],
-    optAr:['مصفوفة','بنية ذاتية الإحالة (Self-referential structure)','مكدس','طابور'], ans:1,
-    exp:'البنية يجب أن تحتوي على مؤشر لنفس نوعها لتمثيل الرابط next.' },
+{q:"Which technique finds the middle node of a singly linked list in one pass?",ar:"أي تقنية تجد العقدة الوسطى في القائمة الأحادية بمرور واحد؟",o:[
+ ["Slow and fast pointers","مؤشّر بطيء ومؤشّر سريع"],
+ ["Binary search","البحث الثنائي"],
+ ["Recursion with an index","الاستدعاء الذاتي مع فهرس"],
+ ["Hashing","التجزئة (Hashing)"]],a:0},
 
-  { t:'mcq', q:'What is the time complexity of searching for an element in a linked list of n nodes?',
-    ar:'ما هو التعقيد الزمني للبحث عن عنصر في قائمة مرتبطة تحتوي على n عقدة؟',
-    opts:['O(1)','O(n)','O(log n)','O(n log n)'],
-    optAr:['O(1)','O(n)','O(log n)','O(n log n)'], ans:1,
-    exp:'البحث يتطلب المرور على العقد واحدة تلو الأخرى → O(n).' },
+{q:"Which algorithm detects a loop (cycle) in a singly linked list?",ar:"أي خوارزمية تكشف وجود حلقة (loop) في القائمة الأحادية؟",o:[
+ ["Floyd's cycle detection (tortoise and hare)","خوارزمية فلويد لكشف الحلقات (السلحفاة والأرنب)"],
+ ["Dijkstra's algorithm","خوارزمية دايكسترا"],
+ ["Binary search","البحث الثنائي"],
+ ["Kruskal's algorithm","خوارزمية كروسكال"]],a:0},
 
-  { t:'mcq', q:'Deleting the first node of a singly linked list takes:',
-    ar:'حذف العقدة الأولى في القائمة المفردة يستغرق:',
-    opts:['O(1)','O(n)','O(log n)','O(n²)'],
-    optAr:['O(1)','O(n)','O(log n)','O(n²)'], ans:0,
-    exp:'يكفي توجيه head إلى العقدة التالية ثم تحرير العقدة القديمة.' },
+{q:"Merging two sorted singly linked lists of sizes n and m takes:",ar:"دمج قائمتين أحاديتين مرتّبتين بحجم n و m يستغرق:",o:[
+ ["O(n + m)","O(n + m)"],
+ ["O(1)","O(1)"],
+ ["O(n × m)","O(n × m)"],
+ ["O(log n + log m)","O(log n + log m)"]],a:0},
 
-  { t:'mcq', q:'What is the space complexity of a singly linked list that contains n nodes?',
-    ar:'ما هو التعقيد المكاني لقائمة مفردة تحتوي على n عقدة؟',
-    opts:['O(1)','O(n)','O(log n)','O(n²)'],
-    optAr:['O(1)','O(n)','O(log n)','O(n²)'], ans:1,
-    exp:'المساحة تتناسب خطياً مع عدد العقد المخزنة.' },
+{q:"Which of the following is a valid self-referential structure for a singly linked list node in C?",ar:"أيٌّ ممّا يلي بنية ذاتية المرجع صحيحة لعقدة قائمة أحادية في لغة C؟",o:[
+ ["struct Node { int data; struct Node* next; };","بنية تحتوي بيانات ومؤشّرًا لنفس نوع البنية"],
+ ["struct Node { int data; struct Node next; };","خطأ: لا يمكن تضمين البنية داخل نفسها"],
+ ["struct Node { int data; int next; };","خطأ: التالي يجب أن يكون مؤشّرًا لا عددًا صحيحًا"],
+ ["struct Node { struct Node* next; };","صحيحة نحويًا لكنها بدون حقل البيانات"]],a:0},
 
-  { t:'mcq', q:'Which operation is NOT efficient in a linked list?',
-    ar:'أي عملية غير فعّالة في القائمة المرتبطة؟',
-    opts:['Insertion at the beginning','Deletion at the beginning','Accessing an element by index','Traversal'],
-    optAr:['الإدراج في البداية','الحذف من البداية','الوصول إلى عنصر بمؤشر (Index)','المرور على العناصر'], ans:2,
-    exp:'الوصول بالمؤشر يتطلب المرور على العقد السابقة → O(n).' },
+{q:"Which is the correct order of statements to insert a new node at the head?",ar:"ما الترتيب الصحيح للتعليمات لإدخال عقدة جديدة في المقدّمة (الرأس)؟",o:[
+ ["newNode->next = head;  head = newNode;","نربط العقدة الجديدة بالرأس الحالي، ثم نجعل الرأس هو العقدة الجديدة"],
+ ["head = newNode;  newNode->next = head;","ترتيب خاطئ يجعل العقدة تشير إلى نفسها"],
+ ["newNode = head;  head = newNode->next;","هذا فقد للعقدة الجديدة ولم يُدخلها"],
+ ["head->next = newNode;  newNode->next = NULL;","هذا يُدخل بعد الرأس وليس في المقدّمة"]],a:0},
 
-  { t:'mcq', q:'What does the "next" field of a node store?',
-    ar:'ماذا يخزّن حقل "next" في العقدة؟',
-    opts:['The data of the node','The address of the next node','The size of the list','The index of the node'],
-    optAr:['بيانات العقدة','عنوان العقدة التالية','حجم القائمة','مؤشر العقدة'], ans:1,
-    exp:'حقل next يحمل عنوان الذاكرة للعقدة التالية في القائمة.' },
+{q:"How can you print the elements of a singly linked list in reverse order?",ar:"كيف يمكنك طباعة عناصر القائمة الأحادية بترتيب معاكس؟",o:[
+ ["Using recursion or a stack","باستخدام الاستدعاء الذاتي أو المكدّس"],
+ ["Simply traversing from the head once","بالمرور من الرأس مرة واحدة فقط"],
+ ["Using a direct index from the tail","باستخدام فهرس مباشر من الذيل"],
+ ["It is impossible","هذا مستحيل"]],a:0},
 
-  { t:'mcq', q:'Which function is commonly used in C to allocate memory for a new node?',
-    ar:'أي دالة تُستخدم غالباً في C لتخصيص ذاكرة لعقدة جديدة؟',
-    opts:['free()','printf()','malloc()','sizeof()'],
-    optAr:['free()','printf()','malloc()','sizeof()'], ans:2,
-    exp:'malloc() تخصّص ذاكرة ديناميكية أثناء تشغيل البرنامج.' },
+{q:"What is the length of a singly linked list when head == NULL?",ar:"ما هو طول القائمة الأحادية عندما head == NULL؟",o:[
+ ["0","صفر"],
+ ["1","واحد"],
+ ["Undefined","غير معرّف"],
+ ["-1","سالب واحد"]],a:0},
 
-  { t:'mcq', q:'How is a doubly linked list different from a singly linked list?',
-    ar:'كيف تختلف القائمة المزدوجة عن القائمة المفردة؟',
-    opts:['Each node has one pointer','Each node has two pointers (next and previous)','It has no head','It cannot be traversed'],
-    optAr:['كل عقدة لها مؤشر واحد','كل عقدة لها مؤشرين (next و previous)','لا يوجد لها head','لا يمكن المرور عليها'], ans:1,
-    exp:'العقدة في القائمة المزدوجة تحتوي على next و previous.' },
+{q:"Deleting the last node of a singly linked list (given only head) requires:",ar:"حذف العقدة الأخيرة من القائمة الأحادية (بوجود head فقط) يتطلّب:",o:[
+ ["Traversing to the second-to-last node — O(n)","المرور حتى العقدة قبل الأخيرة — بزمن O(n)"],
+ ["O(1) time using the head pointer","زمن O(1) باستخدام مؤشّر الرأس"],
+ ["Random access to the last index","وصولًا عشوائيًا للفهرس الأخير"],
+ ["Reversing the list","عكس القائمة"]],a:0},
 
-  { t:'mcq', q:'In a circular linked list:',
-    ar:'في القائمة المرتبطة الدائرية:',
-    opts:['The last node points to NULL','The last node points to the first node','The head is always NULL','Nodes are stored in contiguous memory'],
-    optAr:['تشير العقدة الأخيرة إلى NULL','تشير العقدة الأخيرة إلى العقدة الأولى','head دائماً NULL','العقد مخزنة في ذاكرة متجاورة'], ans:1,
-    exp:'سمة القائمة الدائرية أن نهايتها تعود إلى بدايتها.' },
+{q:"Which statement about memory in a singly linked list is FALSE?",ar:"أي عبارة عن الذاكرة في القائمة الأحادية غير صحيحة؟",o:[
+ ["Elements are stored in contiguous memory locations","العناصر مخزّنة في مواقع ذاكرة متجاورة"],
+ ["Each node is allocated separately","كل عقدة تُخصَّص منفصلة عن الأخرى"],
+ ["A pointer is stored with each element","يُخزَّن مؤشّر مع كل عنصر"],
+ ["Nodes can be scattered in memory","يمكن أن تكون العُقد موزّعة في الذاكرة"]],a:0},
 
-  { t:'mcq', q:'To insert a node after a given node p in a singly linked list, you need:',
-    ar:'لإدراج عقدة بعد عقدة محددة p في القائمة المفردة، تحتاج:',
-    opts:['Only the head pointer','Only the value to insert','A pointer to node p','The tail pointer'],
-    optAr:['مؤشر head فقط','القيمة المراد إدراجها فقط','مؤشراً إلى العقدة p','مؤشر tail فقط'], ans:2,
-    exp:'وجود المؤشر p يتيح تعديل الروابط مباشرة دون المرور على القائمة.' },
+{q:"What happens when you insert into a singly linked list that is \"full\"?",ar:"ماذا يحدث عند الإدخال في قائمة أحادية «ممتلئة»؟",o:[
+ ["It never becomes full; it grows until memory runs out","لا تصبح ممتلئة أبدًا؛ تنمو حتى تنفد الذاكرة"],
+ ["It throws an overflow error immediately","تُطلق خطأ تجاوز فورًا"],
+ ["It doubles its fixed capacity","تُضاعف سعتها الثابتة"],
+ ["It overwrites the head node","تستبدل عقدة الرأس"]],a:0},
 
-  { t:'mcq', q:'If the head pointer of a linked list is lost:',
-    ar:'إذا ضاع مؤشر head للقائمة المرتبطة:',
-    opts:['Only the first node is lost','The entire list becomes inaccessible','The list is reversed','Nothing happens'],
-    optAr:['تفقد العقدة الأولى فقط','تصبح القائمة كاملة غير قابلة للوصول','تُعكس القائمة','لا يحدث شيء'], ans:1,
-    exp:'head هو المدخل الوحيد للقائمة؛ فقدانه يعني فقدان الوصول لكل العقد.' },
+{q:"Which traversal order does a singly linked list naturally support?",ar:"ما ترتيب المرور الذي تدعمه القائمة الأحادية بشكل طبيعي؟",o:[
+ ["Forward only, from head to tail","الأمام فقط، من الرأس إلى الذيل"],
+ ["Forward and backward","الأمام والخلف"],
+ ["Random access order","ترتيب الوصول العشوائي"],
+ ["Sorted order automatically","ترتيب مرتّب تلقائيًا"]],a:0},
 
-  { t:'mcq', q:'Which of the following correctly prints all elements of a linked list?',
-    ar:'أي مما يلي يطبع جميع عناصر القائمة المرتبطة بشكل صحيح؟',
-    opts:['Start from head and follow next until NULL','Start from the tail and move backward','Access elements directly by index','Use binary search'],
-    optAr:['البدء من head ومتابعة next حتى NULL','البدء من tail والحركة للخلف','الوصول للعناصر عبر المؤشر (Index) مباشرة','استخدام البحث الثنائي'], ans:0,
-    exp:'هذه هي طريقة المرور (Traversal) القياسية للقوائم المفردة.' },
-
-  { t:'mcq', q:'In a linked list of integers, the type of the next pointer is:',
-    ar:'في قائمة مرتبطة من الأعداد الصحيحة، يكون نوع المؤشر next:',
-    opts:['int','int*','struct Node*','void'],
-    optAr:['int','int*','struct Node*','void'], ans:2,
-    exp:'المؤشر يجب أن يشير إلى بنية العقدة نفسها من النوع نفسه.' },
-
-  { t:'mcq', q:'What is the main advantage of a linked list over an array?',
-    ar:'ما هي الميزة الرئيسية للقائمة المرتبطة على المصفوفة؟',
-    opts:['Random access','Efficient insertion and deletion','Less memory usage','Contiguous memory'],
-    optAr:['الوصول العشوائي','الإدراج والحذف الفعّالان','استهلاك ذاكرة أقل','ذاكرة متجاورة'], ans:1,
-    exp:'الإدراج والحذف لا يحتاجان إزاحة العناصر كما في المصفوفة.' },
-
-  { t:'mcq', q:'How many pointers are stored in each node of a singly linked list?',
-    ar:'كم مؤشراً يُخزَّن في كل عقدة من قائمة مفردة؟',
-    opts:['0','1','2','3'],
-    optAr:['0','1','2','3'], ans:1,
-    exp:'المؤشر الوحيد هو next الذي يشير للعقدة التالية.' },
-
-  { t:'mcq', q:'Which statement about arrays is correct?',
-    ar:'أي عبارة عن المصفوفات صحيحة؟',
-    opts:['Their size can change at runtime','Elements are stored in contiguous memory','Insertion in the middle is faster than linked lists','Each element uses a pointer'],
-    optAr:['حجمها يتغير أثناء التشغيل','العناصر مخزنة في ذاكرة متجاورة','الإدراج في الوسط أسرع من القوائم المرتبطة','كل عنصر يستخدم مؤشراً'], ans:1,
-    exp:'الخاصية المميزة للمصفوفة هي التخزين المتجاور والوصول العشوائي.' },
-
-  { t:'mcq', q:'Inserting a node at the end of a singly linked list without a tail pointer takes:',
-    ar:'إدراج عقدة في نهاية القائمة المفردة دون مؤشر tail يستغرق:',
-    opts:['O(1)','O(log n)','O(n)','O(n²)'],
-    optAr:['O(1)','O(log n)','O(n)','O(n²)'], ans:2,
-    exp:'يجب المرور حتى العقدة الأخيرة لتغيير مؤشرها → O(n).' },
-
-  { t:'mcq', q:'Memory allocation in a linked list is:',
-    ar:'تخصيص الذاكرة في القائمة المرتبطة يكون:',
-    opts:['Static','Dynamic','Compile-time','Contiguous'],
-    optAr:['ثابتاً (Static)','ديناميكياً (Dynamic)','في وقت الترجمة','متجاوراً'], ans:1,
-    exp:'العقد تُنشأ وتُحرَّر أثناء التشغيل حسب الحاجة.' },
-
-  { t:'mcq', q:'Which technique is used to reverse a singly linked list?',
-    ar:'أي تقنية تُستخدم لعكس القائمة المرتبطة المفردة؟',
-    opts:['Using a queue','Using three pointers: previous, current and next','Using a binary tree','Sorting the list'],
-    optAr:['استخدام طابور','استخدام ثلاثة مؤشرات: السابق والحالي والتالي','استخدام شجرة ثنائية','ترتيب القائمة'], ans:1,
-    exp:'المؤشرات الثلاثة تسمح بتغيير اتجاه الروابط دون ذاكرة إضافية.' },
-
-  { t:'mcq', q:'If a linked list contains 10 → 20 → 30, what is printed by traversal?',
-    ar:'إذا احتوت القائمة على 10 ← 20 ← 30، فماذا يطبع المرور (Traversal)؟',
-    opts:['30 20 10','10 20 30','10 30 20','20 10 30'],
-    optAr:['30 20 10','10 20 30','10 30 20','20 10 30'], ans:1,
-    exp:'المرور يبدأ من head ويتابع الاتجاه الأمامي حتى NULL.' },
-
-  { t:'mcq', q:'Which of the following is NOT easy to perform on a singly linked list?',
-    ar:'أي مما يلي ليس سهلاً التنفيذ في القائمة المفردة؟',
-    opts:['Insertion at the head','Forward traversal','Backward traversal','Deletion at the head'],
-    optAr:['الإدراج في البداية','المرور للأمام','المرور للخلف','الحذف من البداية'], ans:2,
-    exp:'المؤشرات تشير للأمام فقط، فلا يمكن الرجوع للعقدة السابقة مباشرة.' },
-
-  { t:'mcq', q:'What is the purpose of the NULL pointer in a linked list?',
-    ar:'ما هو دور مؤشر NULL في القائمة المرتبطة؟',
-    opts:['To store data','To mark the end of the list','To sort the list','To allocate memory'],
-    optAr:['تخزين البيانات','الدلالة على نهاية القائمة','ترتيب القائمة','تخصيص الذاكرة'], ans:1,
-    exp:'NULL علامة توقف تمنع تجاوز نهاية القائمة.' },
-
-  { t:'mcq', q:'Which of the following is a linear data structure?',
-    ar:'أي مما يلي يُعدّ بنية خطية؟',
-    opts:['Linked list','Tree','Graph','Heap'],
-    optAr:['القائمة المرتبطة','الشجرة','الرسم البياني (Graph)','التراكم (Heap)'], ans:0,
-    exp:'القائمة المرتبطة خطية لأن العناصر مرتبة تسلسلياً.' },
-
-  { t:'mcq', q:'To count the number of nodes in a linked list we need to:',
-    ar:'لحساب عدد العقد في القائمة المرتبطة نحتاج إلى:',
-    opts:['Access the head only','Traverse the whole list','Use binary search','Sort the list first'],
-    optAr:['الوصول إلى head فقط','المرور على القائمة كاملة','استخدام البحث الثنائي','ترتيب القائمة أولاً'], ans:1,
-    exp:'العد يتم بزيارة كل عقدة وزيادة عداد → O(n).' },
-
-  { t:'mcq', q:'When inserting a node into an empty linked list:',
-    ar:'عند إدراج عقدة في قائمة مرتبطة فارغة:',
-    opts:['head is set to the new node','tail is deleted','nothing changes','head becomes NULL'],
-    optAr:['يصبح head هو العقدة الجديدة','يتم حذف tail','لا يتغير شيء','يصبح head يساوي NULL'], ans:0,
-    exp:'العقدة الجديدة هي أول عنصر، لذلك يشير head إليها ويصبح next الخاص بها NULL.' },
-
-  { t:'mcq', q:'Which data structure is best for insertions and deletions at both ends?',
-    ar:'أي بنية بيانات هي الأفضل للإدراج والحذف من الطرفين؟',
-    opts:['Array','Singly linked list','Doubly linked list with head and tail','Stack'],
-    optAr:['المصفوفة','القائمة المفردة','القائمة المزدوجة مع head و tail','المكدس'], ans:2,
-    exp:'وجود head و tail مع مؤشرين لكل عقدة يسهّل العمليات على الطرفين.' },
-
-  { t:'mcq', q:'Another common name for a node in a linked list is:',
-    ar:'اسم آخر شائع للعقدة في القائمة المرتبطة هو:',
-    opts:['Element / record','Index','Bucket','Root'],
-    optAr:['عنصر / سجل (Element / record)','مؤشر (Index)','حاوية (Bucket)','جذر (Root)'], ans:0,
-    exp:'العقدة تسمى أيضاً عنصراً أو سجلاً يحمل بيانات.' },
-
-  { t:'mcq', q:'What is the main drawback of a singly linked list compared to a doubly linked list?',
-    ar:'ما هو العيب الرئيسي للقائمة المفردة مقارنةً بالمزدوجة؟',
-    opts:['It uses more memory','It cannot easily traverse backward','It has no head','It is slower to create'],
-    optAr:['تستهلك ذاكرة أكبر','لا يمكنها المرور للخلف بسهولة','لا يوجد لها head','بطيئة الإنشاء'], ans:1,
-    exp:'انعدام المؤشر previous يمنع الرجوع للخلف مباشرة.' },
-
-  { t:'mcq', q:'Which statement about linked lists is correct?',
-    ar:'أي عبارة عن القوائم المرتبطة صحيحة؟',
-    opts:['Size must be known in advance','Size can change during runtime','Elements are stored contiguously','Access by index is O(1)'],
-    optAr:['يجب معرفة الحجم مسبقاً','الحجم يتغير أثناء التشغيل','العناصر مخزنة بشكل متجاور','الوصول بالمؤشر O(1)'], ans:1,
-    exp:'المرونة في الحجم هي أهم مميزات القوائم المرتبطة.' },
-
-  { t:'mcq', q:'What is the time complexity of inserting a node at a given position k in a linked list?',
-    ar:'ما هو التعقيد الزمني لإدراج عقدة عند موضع محدد k في القائمة المرتبطة؟',
-    opts:['O(1)','O(log n)','O(n)','O(n²)'],
-    optAr:['O(1)','O(log n)','O(n)','O(n²)'], ans:2,
-    exp:'الوصول إلى الموضع k يتطلب المرور على العقد السابقة → O(n).' },
-
-  { t:'mcq', q:'Which of the following is a self-referential structure?',
-    ar:'أي مما يلي يُعدّ بنية ذاتية الإحالة (Self-referential)؟',
-    opts:['struct Node { int data; struct Node *next; }','struct Node { int data; }','struct Node { int data; int next; }','struct Node { float data; char name; }'],
-    optAr:['بنية تحتوي على مؤشر لنفس نوعها','بنية تحتوي على بيانات فقط','بنية تحتوي على عدد صحيح بدل المؤشر','بنية تحتوي على بيانات عادية'], ans:0,
-    exp:'البنية ذاتية الإحالة تحتوي على مؤشر من نوعها نفسه مثل next.' }
+{q:"Which of the following best describes the relationship between nodes in a singly linked list?",ar:"أيٌّ ممّا يلي يصف علاقة العُقد في القائمة الأحادية بأفضل شكل؟",o:[
+ ["Each node is linked to its successor through a pointer","كل عقدة مرتبطة بالعقدة التي تليها عبر مؤشّر"],
+ ["Nodes are indexed by their memory address","العُقد مفهرسة حسب عنوان الذاكنة"],
+ ["Each node is linked to its predecessor and successor","كل عقدة مرتبطة بسابقتها وتاليتها"],
+ ["Nodes are linked in a tree structure","العُقد مرتبطة في بنية شجرية"]],a:0}
 ];
 
-/* =========================================================
+/* =====================================================================
+   SETUP
+   ===================================================================== */
+const TF_OPTS = [["True","صحيح"],["False","خطأ"]];
+const QUESTIONS = DATA.map((d,i)=>({
+  n:i+1,
+  type: d.tf ? 'tf' : 'mc',
+  q: d.q,
+  ar: d.ar,
+  opts: d.tf ? TF_OPTS : d.o,
+  a: d.a
+}));
+const LETTERS = "ABCDEF";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const state = { idx:0, score:0, attempts:0, wrongPicks:[], records:[], answered:false };
+
+/* =====================================================================
    SOUND ENGINE (Web Audio API)
-   ========================================================= */
-let audioCtx = null;
-let soundEnabled = true;
-
-function ensureAudio(){
-  try{
-    if(!audioCtx){
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if(!AC) return null;
-      audioCtx = new AC();
-    }
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
-  }catch(e){ return null; }
+   ===================================================================== */
+let AC = null;
+function ac(){
+  if(!AC){ try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; } }
+  if(AC.state === 'suspended'){ AC.resume(); }
+  return AC;
 }
-
-function tone(freq, dur, type, gain, delay, glide){
-  const ctx = ensureAudio();
-  if(!ctx || !soundEnabled) return;
-  const t0 = ctx.currentTime + (delay || 0);
-  const osc = ctx.createOscillator();
-  const g = ctx.createGain();
-  osc.type = type || 'sine';
-  osc.frequency.setValueAtTime(freq, t0);
-  if(glide) osc.frequency.exponentialRampToValueAtTime(glide, t0 + dur);
+function tone(freq, delay, dur, type='sine', vol=0.16){
+  const c = ac(); if(!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  o.connect(g); g.connect(c.destination);
+  const t0 = c.currentTime + delay;
   g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(gain || 0.1, t0 + 0.018);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  osc.connect(g); g.connect(ctx.destination);
-  osc.start(t0); osc.stop(t0 + dur + 0.05);
+  o.start(t0); o.stop(t0 + dur + 0.06);
+}
+function playCorrect(){
+  [523.25, 659.25, 783.99, 1046.50].forEach((f,i)=>tone(f, i*0.085, 0.34, 'triangle', 0.15));
+  tone(1318.51, 0.34, 0.5, 'sine', 0.09);
+}
+function playWrong(){
+  tone(196.00, 0, 0.22, 'sawtooth', 0.09);
+  tone(155.56, 0.15, 0.30, 'sawtooth', 0.09);
+}
+function playClick(){ tone(720, 0, 0.05, 'sine', 0.045); }
+function playFinish(){
+  const seq = [[523.25,0],[659.25,0.12],[783.99,0.24],[1046.50,0.36],[783.99,0.5],[1046.50,0.62],[1318.51,0.76]];
+  seq.forEach(([f,d])=>tone(f, d, 0.42, 'triangle', 0.16));
+  tone(261.63, 0.9, 1.2, 'sine', 0.09);
 }
 
-function playClick(){ tone(760, 0.055, 'sine', 0.045); }
-
-function playSuccess(){
-  if(!soundEnabled) return;
-  [523.25, 659.25, 783.99, 1046.5].forEach((f,i)=> tone(f, 0.26, 'triangle', 0.10, i*0.085));
-  tone(1567.98, 0.34, 'sine', 0.055, 0.32);
-}
-
-function playError(){
-  if(!soundEnabled) return;
-  tone(233.08, 0.17, 'sawtooth', 0.05);
-  tone(174.61, 0.30, 'sine', 0.065, 0.12);
-}
-
-function playComplete(){
-  if(!soundEnabled) return;
-  const seq = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
-  seq.forEach((f,i)=> tone(f, 0.32, 'triangle', 0.095, i*0.115));
-  seq.slice().reverse().forEach((f,i)=> tone(f/2, 0.38, 'sine', 0.06, 0.85 + i*0.1));
-}
-
-document.addEventListener('pointerdown', function initAudioOnce(){
-  ensureAudio();
-  document.removeEventListener('pointerdown', initAudioOnce);
-}, { once:true });
-
-/* =========================================================
+/* =====================================================================
    CONFETTI
-   ========================================================= */
-const confettiCanvas = document.getElementById('confetti');
-const cctx = confettiCanvas.getContext('2d');
-let particles = [];
-let confettiRunning = false;
-
-function resizeConfetti(){
+   ===================================================================== */
+const cv = document.getElementById('confetti');
+const cctx = cv.getContext('2d');
+let parts = [], running = false;
+const COLORS = ['#e9c46a','#f7e3a1','#8b5cf6','#f472b6','#2dd4bf','#34d399','#ffffff','#ffb703'];
+function sizeCanvas(){
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  confettiCanvas.width = window.innerWidth * dpr;
-  confettiCanvas.height = window.innerHeight * dpr;
-  confettiCanvas.style.width = window.innerWidth + 'px';
-  confettiCanvas.style.height = window.innerHeight + 'px';
+  cv.width = window.innerWidth * dpr;
+  cv.height = window.innerHeight * dpr;
   cctx.setTransform(dpr,0,0,dpr,0,0);
 }
-resizeConfetti();
-window.addEventListener('resize', resizeConfetti);
+window.addEventListener('resize', sizeCanvas);
+sizeCanvas();
 
-const CONFETTI_COLORS = ['#D8A441','#E7C274','#14584A','#5BD6A2','#B4553C','#FFFFFF'];
-
-function burstConfetti(x, y, count){
-  count = count || 70;
-  for(let i=0;i<count;i++){
-    const angle = (Math.random() * Math.PI * 2);
-    const speed = 3 + Math.random() * 8;
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 3,
-      g: 0.16 + Math.random() * 0.12,
-      size: 5 + Math.random() * 8,
-      color: CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
-      rot: Math.random() * Math.PI * 2,
-      vr: (Math.random() - 0.5) * 0.32,
+function spawn(x, y, n, spread){
+  const W = window.innerWidth, H = window.innerHeight;
+  for(let i=0;i<n;i++){
+    const ang = spread ? (Math.random()*Math.PI*2) : (Math.PI/2 + (Math.random()-0.5)*1.4);
+    const sp = spread ? (2 + Math.random()*8) : (1.5 + Math.random()*3);
+    parts.push({
+      x: x !== null ? x : Math.random()*W,
+      y: y !== null ? y : -20 - Math.random()*H*0.25,
+      vx: Math.cos(ang)*sp,
+      vy: spread ? Math.sin(ang)*sp : Math.abs(Math.sin(ang)*sp) + 1,
+      s: 5 + Math.random()*8,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.3,
+      color: COLORS[(Math.random()*COLORS.length)|0],
       life: 1,
-      decay: 0.0075 + Math.random() * 0.009,
-      shape: Math.random() > 0.45 ? 'rect' : 'circle'
+      fade: spread ? 0.008 : 0.006
     });
   }
-  if(!confettiRunning){ confettiRunning = true; requestAnimationFrame(runConfetti); }
+  if(!running){ running = true; requestAnimationFrame(loop); }
 }
-
-function rainConfetti(){
-  for(let i=0;i<90;i++){
-    particles.push({
-      x: Math.random() * window.innerWidth,
-      y: -20 - Math.random() * window.innerHeight * 0.55,
-      vx: (Math.random()-0.5) * 2.2,
-      vy: 2.2 + Math.random() * 3.6,
-      g: 0.035,
-      size: 5 + Math.random() * 8,
-      color: CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
-      rot: Math.random() * Math.PI * 2,
-      vr: (Math.random()-0.5) * 0.22,
-      life: 1,
-      decay: 0.0042 + Math.random() * 0.004,
-      shape: Math.random() > 0.4 ? 'rect' : 'circle'
-    });
-  }
-  if(!confettiRunning){ confettiRunning = true; requestAnimationFrame(runConfetti); }
-}
-
-function runConfetti(){
-  cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-  for(let i=particles.length-1;i>=0;i--){
-    const p = particles[i];
-    p.vy += p.g;
+function loop(){
+  const W = window.innerWidth, H = window.innerHeight;
+  cctx.clearRect(0,0,W,H);
+  parts = parts.filter(p => p.life > 0 && p.y < H + 60);
+  for(const p of parts){
+    p.vy += 0.16;
     p.vx *= 0.992;
-    p.x += p.vx;
-    p.y += p.vy;
-    p.rot += p.vr;
-    p.life -= p.decay;
-    if(p.life <= 0 || p.y > window.innerHeight + 80){
-      particles.splice(i,1);
-      continue;
-    }
+    p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life -= p.fade;
     cctx.save();
     cctx.translate(p.x, p.y);
     cctx.rotate(p.rot);
-    cctx.globalAlpha = Math.max(p.life, 0);
+    cctx.globalAlpha = Math.max(0, Math.min(1, p.life*1.5));
     cctx.fillStyle = p.color;
-    if(p.shape === 'rect'){
-      cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.62);
-    }else{
-      cctx.beginPath();
-      cctx.arc(0,0, p.size/2, 0, Math.PI*2);
-      cctx.fill();
-    }
+    cctx.fillRect(-p.s/2, -p.s/3, p.s, p.s*0.62);
     cctx.restore();
   }
-  if(particles.length > 0){
-    requestAnimationFrame(runConfetti);
-  }else{
-    confettiRunning = false;
-    cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-  }
+  if(parts.length){ requestAnimationFrame(loop); } else { running = false; cctx.clearRect(0,0,W,H); }
+}
+function celebrate(){
+  spawn(window.innerWidth/2, window.innerHeight*0.42, 110, true);
+  setTimeout(()=>spawn(null, null, 70, false), 130);
+}
+function bigCelebrate(){
+  spawn(window.innerWidth/2, window.innerHeight*0.45, 150, true);
+  setTimeout(()=>spawn(null, null, 110, false), 180);
+  setTimeout(()=>spawn(null, null, 90, false), 520);
 }
 
-/* =========================================================
-   TOASTS
-   ========================================================= */
-const toastWrap = document.getElementById('toastWrap');
-const OK_PHRASES = [
-  'أداء رائع يا أبرار، استمري!',
-  'ممتاز! ذاكرتكِ قوية.',
-  'خطوة أخرى نحو الدرجة الكاملة.',
-  'عبقرية! أنتِ متميزة.',
-  'مذهل، رؤيتكِ للمفاهيم واضحة.',
-  'رائع! القائمة المرتبطة لم تعد سراً عليكِ.',
-  'أحسنتِ، هكذا تُصنع الدرجات العالية.',
-  'بطلة! واكملي بنفس الطاقة.',
-  'ذكية! أنتِ قريبة من القمة.',
-  'تبارك الله عليكِ، أداء متقن.'
+/* =====================================================================
+   POPUP
+   ===================================================================== */
+const pop = $('#pop'), popInner = $('#popInner');
+let popTimer = null;
+function showPop(text){
+  popInner.textContent = text;
+  pop.classList.add('show');
+  clearTimeout(popTimer);
+  popTimer = setTimeout(()=>pop.classList.remove('show'), 1500);
+}
+
+/* =====================================================================
+   QUIZ LOGIC
+   ===================================================================== */
+const PRAISE = [
+  "أحسنتِ يا أبرار، أكملي! 🌟",
+  "ما شاء الله عليكِ يا أبرار! 💫",
+  "رائعة يا أبرار، أكملي! ✨",
+  "إجابة مثالية يا أبرار! 👏",
+  "يا سلام عليكِ يا أبرار! 🏆",
+  "ممتازة يا أبرار، استمري! 🚀"
 ];
-const BAD_PHRASES = [
-  'حاولي مرة أخرى، أنتِ أقرب مما تظن.',
-  'لا بأس، الخطأ جزء من التعلم.',
-  'راجعي المفهوم ثم اعيدي المحاولة.',
-  'ثبات يا أبرار، النجاح يحتاج محاولات.',
-  'لا تقلقي، التكرار يثبّت المعلومة.'
+const RETRY_MSGS = [
+  "حاولي مرة أخرى 🌱",
+  "لا بأس يا أبرار، حاولي مرة أخرى 💪",
+  "قريبة جدًا! حاولي مرة أخرى 🌸",
+  "ركّزي شوي يا أبرار، حاولي مرة أخرى 🔎"
 ];
 
-function showToast(type, title, sub){
-  const el = document.createElement('div');
-  el.className = 'toast ' + (type === 'ok' ? 'ok' : 'bad');
-  el.innerHTML = `
-    <div class="flex-none w-9 h-9 rounded-full grid place-items-center ${type==='ok' ? 'bg-white/15' : 'bg-white/15'}">
-      ${type === 'ok'
-        ? '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
-        : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>'}
-    </div>
-    <div>
-      <div class="text-[14.5px] leading-snug">${title}</div>
-      ${sub ? `<div class="text-[12.5px] opacity-85 mt-0.5">${sub}</div>` : ''}
-    </div>`;
-  toastWrap.appendChild(el);
-  setTimeout(()=>{
-    el.classList.add('out');
-    setTimeout(()=> el.remove(), 520);
-  }, type === 'ok' ? 3200 : 2900);
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-/* =========================================================
-   NAV + SCROLL
-   ========================================================= */
-const nav = document.getElementById('nav');
-const scrollProgress = document.getElementById('scrollProgress');
-const heroBg = document.getElementById('heroBg');
-
-let ticking = false;
-function onScroll(){
-  const y = window.scrollY;
-  if(y > 40) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
-
-  const docH = document.documentElement.scrollHeight - window.innerHeight;
-  const pct = docH > 0 ? Math.min((y / docH) * 100, 100) : 0;
-  scrollProgress.style.width = pct + '%';
-
-  if(heroBg && y < window.innerHeight * 1.25){
-    heroBg.style.transform = `scale(1.08) translateY(${y * 0.16}px)`;
-  }
-  ticking = false;
-}
-window.addEventListener('scroll', ()=>{
-  if(!ticking){ ticking = true; requestAnimationFrame(onScroll); }
-}, { passive:true });
-onScroll();
-
-/* active nav link */
-const sections = ['home','concepts','quiz','result'].map(id=>document.getElementById(id)).filter(Boolean);
-const navLinks = Array.from(document.querySelectorAll('.nav-link'));
-if('IntersectionObserver' in window){
-  const navObs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        navLinks.forEach(l=>{
-          l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id);
-        });
-      }
-    });
-  }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
-  sections.forEach(s=>navObs.observe(s));
-}
-
-/* =========================================================
-   REVEAL ON SCROLL
-   ========================================================= */
-document.body.classList.add('anim');
-if('IntersectionObserver' in window){
-  const revObs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('in');
-        revObs.unobserve(e.target);
-      }
-    });
-  }, { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
-
-  document.querySelectorAll('.reveal, .reveal-x, .reveal-scale').forEach((el, i)=>{
-    if(!el.style.getPropertyValue('--d')) el.style.setProperty('--d', (i % 6) * 70 + 'ms');
-    revObs.observe(el);
-  });
-}else{
-  document.querySelectorAll('.reveal, .reveal-x, .reveal-scale').forEach(el=>el.classList.add('in'));
-}
-
-/* =========================================================
-   COUNT UP
-   ========================================================= */
-function animateCount(el, target, duration){
-  const start = performance.now();
-  function step(now){
-    const p = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(target * eased).toString();
-    if(p < 1) requestAnimationFrame(step);
-    else el.textContent = target.toString();
-  }
-  requestAnimationFrame(step);
-}
-
-if('IntersectionObserver' in window){
-  const countObs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const t = parseInt(e.target.getAttribute('data-target') || '0', 10);
-        animateCount(e.target, t, 1500);
-        countObs.unobserve(e.target);
-      }
-    });
-  }, { threshold:0.5 });
-  document.querySelectorAll('.count').forEach(el=>countObs.observe(el));
-}
-
-/* =========================================================
-   MAGNETIC BUTTONS (desktop)
-   ========================================================= */
-const isFinePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-if(isFinePointer){
-  document.querySelectorAll('.magnetic').forEach(btn=>{
-    btn.addEventListener('mousemove', (e)=>{
-      const r = btn.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width/2;
-      const y = e.clientY - r.top - r.height/2;
-      btn.style.transform = `translate(${x*0.16}px, ${y*0.22}px)`;
-    });
-    btn.addEventListener('mouseleave', ()=>{
-      btn.style.transform = '';
-    });
-  });
-
-  /* hero mouse glow */
-  const glow = document.getElementById('mouseGlow');
-  const hero = document.getElementById('home');
-  if(glow && hero){
-    hero.addEventListener('mousemove', (e)=>{
-      const r = hero.getBoundingClientRect();
-      glow.style.left = (e.clientX - r.left) + 'px';
-      glow.style.top = (e.clientY - r.top) + 'px';
-      glow.style.opacity = '1';
-    });
-    hero.addEventListener('mouseleave', ()=>{ glow.style.opacity = '0'; });
-  }
-}
-
-/* =========================================================
-   QUIZ ENGINE
-   ========================================================= */
-const total = QUESTIONS.length;
-let current = 0;
-const answers = new Array(total).fill(null);
-const answered = new Array(total).fill(false);
-let startTime = null;
-let endTime = null;
-
-const qCard = document.querySelector('[data-qcard]');
-const optionsWrap = document.getElementById('options');
-const qText = document.getElementById('qText');
-const qTextAr = document.getElementById('qTextAr');
-const qCounter = document.getElementById('qCounter');
-const qType = document.getElementById('qType');
-const qIndexBadge = document.getElementById('qIndexBadge');
-const feedback = document.getElementById('feedback');
-const fbIcon = document.getElementById('fbIcon');
-const fbTitle = document.getElementById('fbTitle');
-const fbText = document.getElementById('fbText');
-const fbExp = document.getElementById('fbExp');
-const ringBar = document.getElementById('ringBar');
-const ringPercent = document.getElementById('ringPercent');
-const paletteEl = document.getElementById('palette');
-const statAnswered = document.getElementById('statAnswered');
-const statCorrect = document.getElementById('statCorrect');
-const statWrong = document.getElementById('statWrong');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const translateBtn = document.getElementById('translateBtn');
-const translateLabel = document.getElementById('translateLabel');
-
-function letterFor(i){ return ['A','B','C','D','E'][i] || (i+1); }
-
-function buildPalette(){
-  paletteEl.innerHTML = '';
-  for(let i=0;i<total;i++){
-    const b = document.createElement('button');
-    b.className = 'pal';
-    b.textContent = (i+1);
-    b.setAttribute('aria-label', 'السؤال ' + (i+1));
-    b.addEventListener('click', ()=>{
-      playClick();
-      current = i;
-      renderQuestion();
-      const rect = qCard.getBoundingClientRect();
-      if(rect.top < 60 || rect.top > window.innerHeight * 0.72){
-        qCard.scrollIntoView({ behavior:'smooth', block:'center' });
-      }
-    });
-    paletteEl.appendChild(b);
-  }
-}
-
-function updatePalette(){
-  Array.from(paletteEl.children).forEach((el, i)=>{
-    el.classList.remove('active','done','miss');
-    if(i === current) el.classList.add('active');
-    if(answered[i]){
-      if(answers[i] === QUESTIONS[i].ans) el.classList.add('done');
-      else el.classList.add('miss');
-    }
-  });
-}
-
-function updateStats(){
-  let c = 0, w = 0, a = 0;
-  for(let i=0;i<total;i++){
-    if(answered[i]){
-      a++;
-      if(answers[i] === QUESTIONS[i].ans) c++; else w++;
-    }
-  }
-  statAnswered.textContent = a;
-  statCorrect.textContent = c;
-  statWrong.textContent = w;
-
-  const pct = Math.round((a / total) * 100);
-  const C = 2 * Math.PI * 33;
-  ringBar.style.strokeDashoffset = (C - (C * pct / 100)).toFixed(2);
-  ringPercent.textContent = pct + '%';
+function updateBar(){
+  $('#qbFill').style.width = (state.idx / QUESTIONS.length * 100) + '%';
+  $('#qbCount').textContent = (state.idx + 1) + ' / ' + QUESTIONS.length;
+  $('#scoreChip').textContent = '⭐ ' + state.score;
 }
 
 function renderQuestion(){
-  const q = QUESTIONS[current];
+  const q = QUESTIONS[state.idx];
+  state.answered = false;
+  state.attempts = 0;
+  state.wrongPicks = [];
 
-  qCounter.textContent = `السؤال ${current+1} من ${total}`;
-  qIndexBadge.textContent = 'Q' + (current+1);
-  qType.textContent = q.t === 'tf' ? 'صح / خطأ' : 'اختيار من متعدد';
-  qText.textContent = q.q;
-  qTextAr.textContent = q.ar;
+  $('#qCard').classList.remove('show-tr');
+  $('#btnTr').classList.remove('on');
+  $('#btnTr').textContent = '🌐 ترجم السؤال';
 
-  if(qCard.classList.contains('translated')){
-    translateLabel.textContent = 'إخفاء الترجمة';
-  }else{
-    translateLabel.textContent = 'ترجم';
-  }
+  $('#qType').textContent = q.type === 'tf' ? 'صح أو خطأ' : 'اختيار من متعدد';
+  $('#qNum').textContent = 'السؤال ' + q.n;
+  $('#qEn').textContent = q.q;
+  $('#qAr').textContent = q.ar;
 
-  optionsWrap.innerHTML = q.opts.map((opt, i)=>`
-    <button class="opt" data-i="${i}">
-      <span class="opt-letter">${q.t === 'tf' ? (i === 0 ? 'T' : 'F') : letterFor(i)}</span>
-      <span class="flex-1 min-w-0">
-        <span dir="ltr" class="block text-left font-en text-[14.5px] sm:text-[15px] leading-[1.75] text-pine-800">${opt}</span>
-        <span class="opt-ar" dir="rtl">${q.optAr[i]}</span>
-      </span>
-      <span class="opt-mark flex-none opacity-0 transition-opacity duration-300">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"></svg>
-      </span>
-    </button>
-  `).join('');
-
-  optionsWrap.querySelectorAll('.opt').forEach(btn=>{
-    btn.addEventListener('click', ()=> handleAnswer(parseInt(btn.dataset.i,10)));
+  const box = $('#options');
+  box.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'option';
+    b.dataset.i = i;
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span>' +
+      '<span class="opt-text"><span class="opt-en" dir="ltr">' + esc(o[0]) + '</span>' +
+      '<span class="opt-ar" dir="rtl">' + esc(o[1]) + '</span></span>';
+    b.addEventListener('click', () => choose(i, b));
+    box.appendChild(b);
   });
 
-  // restore answered state
-  if(answered[current]){
-    paintAnsweredState();
-  }else{
-    feedback.className = 'feedback mt-6';
-  }
+  const fb = $('#feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
 
-  prevBtn.disabled = current === 0;
-  prevBtn.style.opacity = current === 0 ? '.45' : '1';
-  prevBtn.style.cursor = current === 0 ? 'not-allowed' : 'pointer';
+  const btnNext = $('#btnNext');
+  btnNext.style.display = 'none';
+  btnNext.textContent = (state.idx === QUESTIONS.length - 1) ? 'عرض النتيجة 🏆' : 'السؤال التالي ←';
 
-  nextBtn.innerHTML = (current === total - 1)
-    ? `عرض النتيجة
-       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`
-    : `التالي
-       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`;
-
-  updateStats();
-  updatePalette();
+  updateBar();
 }
 
-function paintAnsweredState(){
-  const q = QUESTIONS[current];
-  const chosen = answers[current];
-  const correct = q.ans;
+function choose(i, btn){
+  if(state.answered || btn.disabled) return;
+  const q = QUESTIONS[state.idx];
 
-  optionsWrap.querySelectorAll('.opt').forEach(btn=>{
-    const i = parseInt(btn.dataset.i, 10);
+  if(i === q.a){
+    state.answered = true;
+    btn.classList.add('correct');
+    document.querySelectorAll('.option').forEach(o => o.disabled = true);
+
+    const firstTry = state.attempts === 0;
+    state.records[state.idx] = {
+      firstTry: firstTry,
+      wrongPicks: state.wrongPicks.slice(),
+      tries: state.attempts + 1
+    };
+    if(firstTry) state.score++;
+
+    playCorrect();
+    celebrate();
+    const msg = PRAISE[(Math.random()*PRAISE.length)|0];
+    showPop(firstTry ? msg : "أحسنتِ يا أبرار، أكملي! 🌟");
+
+    const fb = $('#feedback');
+    fb.className = 'feedback ok show';
+    fb.innerHTML = (firstTry ? msg : "أحسنتِ يا أبرار، أكملي! 🌟") +
+      '<small>إجابة صحيحة' + (firstTry ? ' من المحاولة الأولى — ممتاز! 🎉' : ' بعد المحاولة مرة أخرى — استمري! 💚') + '</small>';
+
+    $('#btnNext').style.display = 'inline-block';
+    updateBar();
+  } else {
+    state.attempts++;
+    state.wrongPicks.push(i);
+    btn.classList.add('wrong');
     btn.disabled = true;
-    const mark = btn.querySelector('.opt-mark');
-    if(i === correct){
-      btn.classList.add(chosen === correct ? 'correct' : 'reveal-answer');
-      mark.style.opacity = '1';
-      mark.style.color = '#1B8A5E';
-      mark.innerHTML = '<path d="M20 6 9 17l-5-5"/>';
-    }else if(i === chosen){
-      btn.classList.add('wrong');
-      mark.style.opacity = '1';
-      mark.style.color = '#C2553D';
-      mark.innerHTML = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>';
-    }else{
-      btn.classList.add('dim');
-    }
-  });
-
-  const isCorrect = chosen === correct;
-  feedback.className = 'feedback mt-6 show ' + (isCorrect ? 'ok' : 'bad');
-  fbIcon.style.background = isCorrect ? 'rgba(27,138,94,.15)' : 'rgba(194,85,61,.15)';
-  fbIcon.style.color = isCorrect ? '#1B8A5E' : '#C2553D';
-  fbIcon.innerHTML = isCorrect
-    ? '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
-    : '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
-
-  if(isCorrect){
-    fbTitle.textContent = 'احسنتي يا أبرار، اكملي!';
-    fbTitle.style.color = '#146B47';
-    fbText.textContent = OK_PHRASES[current % OK_PHRASES.length];
-  }else{
-    fbTitle.textContent = 'حاولي مرة أخرى';
-    fbTitle.style.color = '#A8422D';
-    fbText.textContent = BAD_PHRASES[current % BAD_PHRASES.length] + ' الإجابة النموذجية موضّحة باللون الأخضر.';
+    playWrong();
+    const fb = $('#feedback');
+    fb.className = 'feedback no show';
+    fb.innerHTML = RETRY_MSGS[(Math.random()*RETRY_MSGS.length)|0] +
+      '<small>لا تستسلمي يا أبرار، إنتِ قادرة 💪</small>';
   }
-
-  const correctLabel = q.t === 'tf'
-    ? (q.opts[correct] === 'True' ? 'صواب (True)' : 'خطأ (False)')
-    : `${letterFor(correct)}) ${q.opts[correct]}`;
-
-  fbExp.innerHTML = `<strong>الإجابة النموذجية:</strong> <span dir="ltr" class="font-en">${correctLabel}</span> &nbsp;•&nbsp; ${q.exp}`;
 }
 
-function handleAnswer(i){
-  if(answered[current]) return;
-
-  if(startTime === null) startTime = Date.now();
-
-  const q = QUESTIONS[current];
-  answers[current] = i;
-  answered[current] = true;
-
-  const isCorrect = i === q.ans;
-
-  // paint options
-  optionsWrap.querySelectorAll('.opt').forEach(btn=>{
-    const idx = parseInt(btn.dataset.i, 10);
-    btn.disabled = true;
-    const mark = btn.querySelector('.opt-mark');
-    if(idx === q.ans){
-      btn.classList.add('correct');
-      mark.style.opacity = '1';
-      mark.style.color = '#1B8A5E';
-      mark.innerHTML = '<path d="M20 6 9 17l-5-5"/>';
-    }else if(idx === i){
-      btn.classList.add('wrong');
-      mark.style.opacity = '1';
-      mark.style.color = '#C2553D';
-      mark.innerHTML = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>';
-    }else{
-      btn.classList.add('dim');
-    }
-  });
-
-  // feedback
-  feedback.className = 'feedback mt-6 show ' + (isCorrect ? 'ok' : 'bad');
-  fbIcon.style.background = isCorrect ? 'rgba(27,138,94,.15)' : 'rgba(194,85,61,.15)';
-  fbIcon.style.color = isCorrect ? '#1B8A5E' : '#C2553D';
-  fbIcon.innerHTML = isCorrect
-    ? '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
-    : '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
-
-  const correctIdx = q.ans;
-  const correctLabel = q.t === 'tf'
-    ? (q.opts[correctIdx] === 'True' ? 'صواب (True)' : 'خطأ (False)')
-    : `${letterFor(correctIdx)}) ${q.opts[correctIdx]}`;
-
-  if(isCorrect){
-    fbTitle.textContent = 'احسنتي يا أبرار، اكملي!';
-    fbTitle.style.color = '#146B47';
-    fbText.textContent = OK_PHRASES[Math.floor(Math.random()*OK_PHRASES.length)];
-    fbExp.innerHTML = `<strong>الإجابة النموذجية:</strong> <span dir="ltr" class="font-en">${correctLabel}</span> &nbsp;•&nbsp; ${q.exp}`;
-    playSuccess();
-    const rect = optionsWrap.getBoundingClientRect();
-    burstConfetti(
-      Math.min(Math.max(rect.left + rect.width * 0.55, 80), window.innerWidth - 80),
-      Math.max(rect.top + 40, 90),
-      window.innerWidth < 640 ? 55 : 95
-    );
-    showToast('ok', 'احسنتي يا أبرار، اكملي!', OK_PHRASES[Math.floor(Math.random()*OK_PHRASES.length)]);
-  }else{
-    fbTitle.textContent = 'حاولي مرة أخرى';
-    fbTitle.style.color = '#A8422D';
-    fbText.textContent = BAD_PHRASES[Math.floor(Math.random()*BAD_PHRASES.length)] + ' الإجابة النموذجية موضّحة باللون الأخضر.';
-    fbExp.innerHTML = `<strong>الإجابة النموذجية:</strong> <span dir="ltr" class="font-en">${correctLabel}</span> &nbsp;•&nbsp; ${q.exp}`;
-    playError();
-    showToast('bad', 'حاولي مرة أخرى', 'راجعي الإجابة النموذجية ثم انتقلي للسؤال التالي');
-  }
-
-  updateStats();
-  updatePalette();
-}
-
-/* translate toggle */
-translateBtn.addEventListener('click', ()=>{
-  const active = qCard.classList.toggle('translated');
-  translateLabel.textContent = active ? 'إخفاء الترجمة' : 'ترجم';
+$('#btnNext').addEventListener('click', () => {
   playClick();
-});
-
-/* nav buttons */
-prevBtn.addEventListener('click', ()=>{
-  if(current === 0) return;
-  current--;
-  playClick();
-  renderQuestion();
-  qCard.scrollIntoView({ behavior:'smooth', block:'center' });
-});
-
-nextBtn.addEventListener('click', ()=>{
-  playClick();
-  if(current < total - 1){
-    current++;
+  if(state.idx === QUESTIONS.length - 1){
+    finish();
+  } else {
+    state.idx++;
     renderQuestion();
-    qCard.scrollIntoView({ behavior:'smooth', block:'center' });
-  }else{
-    finishQuiz();
   }
 });
 
-/* =========================================================
-   RESULTS / REPORT
-   ========================================================= */
-const reportList = document.getElementById('reportList');
-const scoreArc = document.getElementById('scoreArc');
-const scorePercent = document.getElementById('scorePercent');
-const scoreLabel = document.getElementById('scoreLabel');
-const finalCorrect = document.getElementById('finalCorrect');
-const finalWrong = document.getElementById('finalWrong');
-const finalTime = document.getElementById('finalTime');
-const finalNote = document.getElementById('finalNote');
-const progressBar = document.getElementById('progressBar');
-const progressLabel = document.getElementById('progressLabel');
-
-function formatTime(ms){
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
-}
-
-function buildReport(){
-  reportList.innerHTML = QUESTIONS.map((q, i)=>{
-    const chosen = answers[i];
-    const isAnswered = answered[i];
-    const isCorrect = isAnswered && chosen === q.ans;
-
-    const chosenLabel = !isAnswered ? 'لم تُجبي بعد'
-      : (q.t === 'tf'
-          ? (q.opts[chosen] === 'True' ? 'صواب (True)' : 'خطأ (False)')
-          : `${letterFor(chosen)}) ${q.opts[chosen]}`);
-
-    const correctLabel = q.t === 'tf'
-      ? (q.opts[q.ans] === 'True' ? 'صواب (True)' : 'خطأ (False)')
-      : `${letterFor(q.ans)}) ${q.opts[q.ans]}`;
-
-    const statusColor = !isAnswered ? '#D8A441' : (isCorrect ? '#5BD6A2' : '#E7684A');
-    const statusText = !isAnswered ? 'لم تُجبي' : (isCorrect ? 'إجابة صحيحة' : 'إجابة خاطئة');
-
-    return `
-      <div class="report-item bg-white/[0.055] border-white/10" data-status="${isCorrect ? 'correct' : (isAnswered ? 'wrong' : 'none')}">
-        <div class="flex items-start gap-4">
-          <div class="flex-none w-11 h-11 rounded-2xl grid place-items-center font-en font-bold text-[13px]"
-               style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">
-            ${i+1}
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center flex-wrap gap-2.5">
-              <span class="inline-flex items-center gap-2 text-[11.5px] font-semibold px-3 py-1 rounded-full"
-                    style="background:${statusColor}20;color:${statusColor}">
-                <i class="status-dot" style="background:${statusColor}"></i>${statusText}
-              </span>
-              <span class="badge badge-gold text-[11px]">${q.t === 'tf' ? 'صح / خطأ' : 'اختيار من متعدد'}</span>
-            </div>
-
-            <div dir="ltr" class="text-left mt-3 font-en text-[14.5px] leading-[1.85] text-pine-800">
-              ${q.q}
-            </div>
-            <div class="mt-2 text-[13.5px] leading-[2] text-pine-800/72">
-              ${q.ar}
-            </div>
-
-            <div class="mt-4 grid sm:grid-cols-2 gap-3">
-              <div class="rounded-xl p-3.5 border ${isCorrect ? 'border-[#5BD6A2]/35 bg-[#5BD6A2]/10' : 'border-white/12 bg-white/[0.04]'}">
-                <div class="text-[11px] opacity-70 mb-1.5">إجابتكِ</div>
-                <div class="text-[13px] font-semibold" style="color:${isCorrect ? '#7FE6B7' : (isAnswered ? '#F09078' : '#E7C274')}">
-                  <span dir="ltr" class="font-en">${chosenLabel}</span>
-                </div>
-              </div>
-              <div class="rounded-xl p-3.5 border border-[#E7C274]/30 bg-[#E7C274]/10">
-                <div class="text-[11px] opacity-70 mb-1.5 text-white/70">الإجابة النموذجية</div>
-                <div class="text-[13px] font-semibold text-gold-400">
-                  <span dir="ltr" class="font-en">${correctLabel}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-3.5 rounded-xl p-3.5 bg-white/[0.04] border border-white/10">
-              <div class="text-[12.5px] leading-[2] text-white/72">
-                <strong class="text-white/85">التفسير:</strong> ${q.exp}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function finishQuiz(){
-  const answeredCount = answered.filter(Boolean).length;
-  if(answeredCount === 0){
-    showToast('bad', 'حاولي مرة أخرى', 'أجيبي عن سؤال واحد على الأقل قبل عرض النتيجة');
-    return;
-  }
-
-  if(endTime === null) endTime = Date.now();
-  const elapsed = (startTime ? endTime - startTime : 0);
-
-  let c = 0, w = 0;
-  for(let i=0;i<total;i++){
-    if(answered[i]){
-      if(answers[i] === QUESTIONS[i].ans) c++; else w++;
-    }
-  }
-
-  const pct = Math.round((c / total) * 100);
-
-  buildReport();
-
-  finalCorrect.textContent = c;
-  finalWrong.textContent = w;
-  finalTime.textContent = formatTime(elapsed);
-  progressBar.style.width = pct + '%';
-  progressLabel.textContent = `${c} / ${total}`;
-
-  let label = 'بداية جيدة';
-  let note = 'أداء جيد يا أبرار! راجعي الأسئلة التي أخطأتِ فيها وستصلين إلى القمة.';
-  if(pct >= 90){ label = 'ممتاز'; note = 'تبارك الله عليكِ يا أبرار! أداء استثنائي ومتميز، أنتِ جاهزة تماماً للكويز.'; }
-  else if(pct >= 75){ label = 'جيد جداً'; note = 'أداء رائع يا أبرار! انتبهي للتفاصيل البسيطة في الأسئلة التي أخطأتِ فيها.'; }
-  else if(pct >= 60){ label = 'جيد'; note = 'أساسكِ قوي، لكنكِ تحتاجين مراجعة إضافية لبعض المفاهيم قبل الكويز.'; }
-  else if(pct >= 40){ label = 'يحتاج مراجعة'; note = 'لا بأس، راجعي المفاهيم الأساسية في أعلى الصفحة ثم أعيدي المحاولة.'; }
-  else { label = 'بداية الرحلة'; note = 'النجاح يبدأ من هنا يا أبرار؛ ابدئي بمراجعة العقدة والمؤشر و head و NULL.'; }
-
-  scoreLabel.textContent = label;
-  finalNote.textContent = note;
-
-  document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'start' });
-
-  setTimeout(()=>{
-    const C = 2 * Math.PI * 92;
-    scoreArc.style.strokeDashoffset = (C - (C * pct / 100)).toFixed(2);
-    animateCount(scorePercent, pct, 1500);
-  }, 260);
-
-  playComplete();
-  setTimeout(rainConfetti, 320);
-  setTimeout(rainConfetti, 900);
-  showToast('ok', 'اكتملت المراجعة يا أبرار!', `نتيجتكِ ${pct}% — ${label}`);
-}
-
-/* report filters */
-function setFilter(mode, btn){
-  document.querySelectorAll('.filter-btn').forEach(b=>{
-    b.classList.remove('bg-white/12');
-    b.classList.add('text-white/72');
-    b.classList.remove('text-white');
-  });
-  btn.classList.add('bg-white/12','text-white');
-  btn.classList.remove('text-white/72');
-
-  document.querySelectorAll('#reportList .report-item').forEach(item=>{
-    const st = item.getAttribute('data-status');
-    let show = true;
-    if(mode === 'correct') show = (st === 'correct');
-    if(mode === 'wrong') show = (st === 'wrong');
-    item.style.display = show ? '' : 'none';
-  });
-}
-document.getElementById('filterAll').addEventListener('click', function(){ setFilter('all', this); });
-document.getElementById('filterCorrect').addEventListener('click', function(){ setFilter('correct', this); });
-document.getElementById('filterWrong').addEventListener('click', function(){ setFilter('wrong', this); });
-
-/* restart */
-function restartQuiz(){
-  for(let i=0;i<total;i++){ answers[i] = null; answered[i] = false; }
-  current = 0;
-  startTime = null;
-  endTime = null;
-  scoreArc.style.strokeDashoffset = '578';
-  scorePercent.textContent = '0';
-  scoreLabel.textContent = 'جارٍ التقييم...';
-  finalCorrect.textContent = '0';
-  finalWrong.textContent = '0';
-  finalTime.textContent = '00:00';
-  finalNote.textContent = 'أكملي الأسئلة لتظهر النتيجة النهائية والتقرير المفصّل.';
-  progressBar.style.width = '0%';
-  progressLabel.textContent = `0 / ${total}`;
-  qCard.classList.remove('translated');
-  translateLabel.textContent = 'ترجم';
-  renderQuestion();
-  buildReport();
+/* =====================================================================
+   TRANSLATE TOGGLES
+   ===================================================================== */
+$('#btnTr').addEventListener('click', () => {
+  const card = $('#qCard');
+  card.classList.toggle('show-tr');
+  const on = card.classList.contains('show-tr');
+  $('#btnTr').classList.toggle('on', on);
+  $('#btnTr').textContent = on ? '🌐 إخفاء الترجمة' : '🌐 ترجم السؤال';
   playClick();
-  document.getElementById('quiz').scrollIntoView({ behavior:'smooth', block:'start' });
-  showToast('ok', 'انطلقت من جديد يا أبرار!', 'حظاً موفقاً في هذه المحاولة');
+});
+
+/* =====================================================================
+   FINISH & REPORT
+   ===================================================================== */
+function finish(){
+  showScreen('screen-result');
+  const total = QUESTIONS.length;
+  const first = state.score;
+  const pct = Math.round(first / total * 100);
+
+  // animated ring
+  const ring = $('#ring');
+  let start = null;
+  function animateRing(ts){
+    if(!start) start = ts;
+    const p = Math.min((ts - start) / 950, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    ring.style.setProperty('--p', (pct * eased).toFixed(1));
+    $('#scorePct').textContent = Math.round(pct * eased) + '%';
+    if(p < 1) requestAnimationFrame(animateRing);
+  }
+  requestAnimationFrame(animateRing);
+
+  let retryCount = 0, wrongFirst = 0;
+  state.records.forEach(r => { if(r){ if(!r.firstTry) retryCount++; } });
+  state.records.forEach(r => { if(r && !r.firstTry) wrongFirst++; });
+
+  $('#sumGood').textContent = first;
+  $('#sumRetry').textContent = retryCount;
+  $('#sumWrong').textContent = wrongFirst;
+
+  let title, sub;
+  if(pct >= 90){ title = 'ما شاء الله! نتيجة مبهرة يا أبرار 🏆'; sub = 'مستواكِ ممتاز في شابتر Single Linked List — بالتوفيق في الكويز، إنتِ جاهزة! 💚'; }
+  else if(pct >= 75){ title = 'أحسنتِ يا أبرار! نتيجة قوية 🌟'; sub = 'مستواكِ جيد جدًا، راجعي الأسئلة التي احتجتِ فيها محاولة إضافية وستكونين ممتازة.'; }
+  else if(pct >= 50){ title = 'خطوة جيدة يا أبرار، أكملي 💪'; sub = 'ركّزي على الأساسيات: الإدخال والحذف والمرور والتعقيد الزمني، ثم أعيدي المراجعة.'; }
+  else { title = 'لا بأس يا أبرار، البداية دائمًا صعبة 🌱'; sub = 'خذي وقتكِ في مراجعة الإجابات النموذجية بالأسفل، ثم أعيدي المراجعة من جديد — إنتِ تقدرين!'; }
+  $('#resTitle').textContent = title;
+  $('#resSub').textContent = sub + '  (النتيجة: ' + first + ' من ' + total + ')';
+
+  // build report
+  const list = $('#resList');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const rec = state.records[i] || { firstTry:false, wrongPicks:[], tries:0 };
+    const div = document.createElement('div');
+    div.className = 'res-item ' + (rec.firstTry ? 'good' : 'retry');
+
+    let wrongHtml = '';
+    if(!rec.firstTry && rec.wrongPicks.length){
+      const wp = rec.wrongPicks.map(x => LETTERS[x] + ') ' + esc(q.opts[x][0])).join('  |  ');
+      wrongHtml = '<div class="ans bad"><b>إجابتك أول مرة:</b> <span class="v">' + wp + '</span></div>';
+    }
+
+    div.innerHTML =
+      '<div class="res-head">' +
+        '<span class="res-num">' + q.n + '</span>' +
+        '<span class="res-q" dir="ltr">' + esc(q.q) + '</span>' +
+        '<span class="res-tag">' + (rec.firstTry ? '✔ من أول محاولة' : '↻ بعد إعادة المحاولة') + '</span>' +
+      '</div>' +
+      '<div class="res-ar">' + esc(q.ar) + '</div>' +
+      '<div class="res-ans">' +
+        '<div class="ans ok"><b>الإجابة النموذجية:</b> <span class="v">' + LETTERS[q.a] + ') ' + esc(q.opts[q.a][0]) + '</span></div>' +
+        wrongHtml +
+      '</div>' +
+      '<div class="res-tools"><button class="btn-translate res-tr">🌐 ترجم</button></div>';
+
+    list.appendChild(div);
+  });
+
+  // delegated translate for report items
+  list.querySelectorAll('.res-tr').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.res-item');
+      item.classList.toggle('show-ar');
+      const on = item.classList.contains('show-ar');
+      btn.classList.toggle('on', on);
+      btn.textContent = on ? '🌐 إخفاء' : '🌐 ترجم';
+      playClick();
+    });
+  });
+
+  playFinish();
+  if(pct >= 60) bigCelebrate();
+  setTimeout(()=>{ if(pct >= 80) bigCelebrate(); }, 900);
 }
-document.getElementById('restartBtn').addEventListener('click', restartQuiz);
-document.getElementById('restartBtn2').addEventListener('click', restartQuiz);
-document.getElementById('printBtn').addEventListener('click', ()=>{
-  buildReport();
-  window.print();
+
+/* =====================================================================
+   TR TRANSLATE ALL
+   ===================================================================== */
+let allTr = false;
+$('#btnTrAll').addEventListener('click', () => {
+  allTr = !allTr;
+  $('#btnTrAll').textContent = allTr ? '🌐 إخفاء الترجمة' : '🌐 ترجمة كل الأسئلة';
+  document.querySelectorAll('#resList .res-item').forEach(it => {
+    it.classList.toggle('show-ar', allTr);
+    const b = it.querySelector('.res-tr');
+    if(b){ b.classList.toggle('on', allTr); b.textContent = allTr ? '🌐 إخفاء' : '🌐 ترجم'; }
+  });
+  playClick();
 });
 
-/* sound toggle */
-const soundBtn = document.getElementById('soundBtn');
-soundBtn.addEventListener('click', ()=>{
-  soundEnabled = !soundEnabled;
-  document.getElementById('soundOnIcon').classList.toggle('hidden', !soundEnabled);
-  document.getElementById('soundOffIcon').classList.toggle('hidden', soundEnabled);
-  if(soundEnabled){
-    ensureAudio();
-    playClick();
-    showToast('ok', 'تم تشغيل الأصوات التحفيزية', 'استمتعي بتجربة تفاعلية متكاملة');
-  }else{
-    showToast('bad', 'تم كتم الصوت', 'يمكنكِ تفعيله في أي وقت');
-  }
-});
+/* =====================================================================
+   START / RESTART
+   ===================================================================== */
+function startQuiz(){
+  ac();
+  state.idx = 0;
+  state.score = 0;
+  state.records = [];
+  state.answered = false;
+  allTr = false;
+  $('#btnTrAll').textContent = '🌐 ترجمة كل الأسئلة';
+  showScreen('screen-quiz');
+  renderQuestion();
+  playClick();
+}
+$('#btnStart').addEventListener('click', startQuiz);
+$('#btnRestart').addEventListener('click', startQuiz);
 
-/* keyboard navigation */
-document.addEventListener('keydown', (e)=>{
-  const tag = (e.target.tagName || '').toLowerCase();
-  if(tag === 'input' || tag === 'textarea') return;
-  if(e.key === 'ArrowLeft'){
-    if(current < total - 1){ current++; renderQuestion(); }
-  }else if(e.key === 'ArrowRight'){
-    if(current > 0){ current--; renderQuestion(); }
-  }
-});
+/* warm up audio on first interaction */
+window.addEventListener('pointerdown', function warm(){ ac(); window.removeEventListener('pointerdown', warm); }, {once:true});
 
-/* init */
-buildPalette();
-renderQuestion();
-buildReport();
+updateBar();
 </script>
 </body>
 </html>
